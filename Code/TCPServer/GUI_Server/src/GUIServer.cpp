@@ -329,9 +329,44 @@ class UR5GUI : public App {
             ImGui::ProgressBar((float)(pcb_left/max_pcb), ImVec2(100, 0.f), pcb_buf);ImGui::SameLine(); ImGui::Text(max_pcb_buf);
 
             ImGui::EndChild();
+            
 
+            //Creates the section with the graphs.
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0],  second_row_ypos + (int)(second_row_height)), ImGuiCond_Always);
+            ImGui::BeginChild("Graphs", ImVec2((int)(dash_panel_info[2]), (int)(screen_height - second_row_ypos + (int)(second_row_height))), child_flags, window_flags);
+            ImGui::Spacing(); ImGui::Spacing();
 
-            ImGui::EndChild();
+            ImGui::Indent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 5));
+            ImGui::TextUnformatted("Torque Profile");
+            ImGui::Spacing();
+            ImGui::Unindent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 5));
+            static float torque_arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
+            ImGui::Indent(10);
+            ImGui::PlotLines(" ", torque_arr, IM_ARRAYSIZE(torque_arr), 0, "", -1.0f, 1.0f, ImVec2(dash_panel_info[2]-30, 110.0f));
+            ImGui::Unindent(10);
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+            static float vel_arr[] = { 0.9f, -0.2f, 0.4f, 0.2f, -0.32f, -0.1f, 0.2f };
+            ImGui::Indent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 5));
+            ImGui::TextUnformatted("Velocity Profile");
+            ImGui::Spacing();
+            ImGui::Unindent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 5));
+            ImGui::Indent(10);
+            ImGui::PlotLines(" ", vel_arr, IM_ARRAYSIZE(vel_arr), 0, "", -1.0f, 1.0f, ImVec2(dash_panel_info[2]-30, 110.0f));
+            ImGui::Unindent(10);
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+
+            static float acc_arr[] = { 0.6f, -0.1f, 1.0f, 0.5f, -0.12f, 0.1f, 0.2f };
+            ImGui::Indent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 6));
+            ImGui::TextUnformatted("Acceleration Profile");
+            ImGui::Spacing();
+            ImGui::Unindent((int)(dash_panel_info[2]/2-ImGui::GetFontSize() * 6));
+            ImGui::Indent(10);
+            ImGui::PlotLines(" ", acc_arr, IM_ARRAYSIZE(acc_arr), 0, "", -1.0f, 1.0f, ImVec2(dash_panel_info[2]-30, 110.0f));
+
+            ImGui::EndChild(); // Graph child
+
+            ImGui::EndChild(); // Dashboard child
         }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
