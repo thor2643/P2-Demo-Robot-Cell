@@ -43,13 +43,13 @@ is coded.
 */ 
 class App {
     public:
-        App() {
+        App(int width, int height) {
             glfwSetErrorCallback(glfw_error_callback);
             if (!glfwInit())
                 std::exit(1);
 
             // Create window with graphics context
-            window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL2 example", nullptr, nullptr);
+            window = glfwCreateWindow(width, height, "P2 Robot Cell Demonstration", nullptr, nullptr);
             if (window == nullptr)
                 std::exit(1);
 
@@ -86,10 +86,6 @@ class App {
             //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
             //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
             //IM_ASSERT(font != nullptr);
-
-            // Our state
-            bool show_demo_window = true;
-            bool show_another_window = false;
 
         }
 
