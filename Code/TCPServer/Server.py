@@ -33,15 +33,16 @@ conn, address = soc.accept()
 # print the address of connection
 print('Connected with ' + address[0] + ':'+ str(address[1]))
 
-#UR socket script commands expects to recive ASCII encoded characters
-msg = "Hello there!"
-msg_bin = msg.encode("ASCII")
+while True:
+    #UR socket script commands expects to recive ASCII encoded characters
+    msg = "Run Program" #input("Write command: ")
+    msg_bin = msg.encode("ASCII")
 
-conn.send(msg_bin)
+    conn.send(msg_bin)
 
-print("Message Sent. Expecting to receive an answer...")
+    #print("Message Sent. Expecting to receive an answer...")
 
-msg_recv = conn.recv(1024)
+    msg_recv = conn.recv(1024)
 
-msg_decode = msg_recv.decode("ASCII")
-print(f"Received reply: {msg_decode}")
+    msg_decode = msg_recv.decode("ASCII")
+    print(f"Received reply: {msg_decode}")
