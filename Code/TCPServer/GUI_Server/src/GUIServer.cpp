@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "URSocket.hpp"
 
 // This is a special compile scenario, where only a header is given.
 // No cpp file is needed and there the file is also not mentioned in the makefile.
@@ -9,8 +10,9 @@
 
 class UR5GUI : public App {
     public:
-        UR5GUI(int width, int height):App(width, height), screen_width(width), screen_height(height){
+        UR5GUI(int width, int height, URSocket* sock):App(width, height), _URSocket(sock), screen_width(width), screen_height(height){
             InitPanelSizes();
+            std::cout << "Initialising GUI\n";
             bool ret = LoadTextureFromFile("../P2_Cell_Static.png", &my_image_texture, &my_image_width, &my_image_height);
             IM_ASSERT(ret);
         }
@@ -26,6 +28,20 @@ class UR5GUI : public App {
         All custom GUI stuff is written in this function. Function calls is used to organise the code.
         */
         virtual void Update() final {
+            // Check for new data at socket
+            // if not connected
+            if (!_URSocket->Connected()) {
+                //std::cout << "waiting for connection..." << std::endl;
+                _URSocket->AcceptConnection(); // Accept any incoming connection.
+            }
+            else 
+            {
+                //std::cout << "handling a connection..." << std::endl;
+                show_test_popup = true;
+                // handle the current connection and update state
+                _URSocket->HandleConnection(recv_msg);
+            }
+
             // Resize the window to fit the glfw window.
             ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
             ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
@@ -44,12 +60,16 @@ class UR5GUI : public App {
             HelloWorldWindow();
 
 
-            if (show_test_popup)
+            if (show_test_popup){
                 TestPopupWindow();
+            }
+                
 
             // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-            if (show_demo_window)
+            if (show_demo_window){
                 ImGui::ShowDemoWindow(&show_demo_window);
+            }
+                
 
             // End main window
             ImGui::End();
@@ -396,6 +416,8 @@ class UR5GUI : public App {
         // TODO: Send start signal to robot over TCP
         void TestPopupWindow(){            
             ImGui::Begin("Program Started", &show_test_popup);
+
+            ImGui::TextWrapped(recv_msg);
             ImGui::End();
            
         }
@@ -442,6 +464,7 @@ class UR5GUI : public App {
             int my_image_width = 0;
             int my_image_height = 0;
             GLuint my_image_texture = 0;
+            URSocket* _URSocket;
 
             char refill_bot_blue[16] = "0";
             char refill_bot_pink[16] = "0";
@@ -452,8 +475,10 @@ class UR5GUI : public App {
             char refill_fuses[16] = "0";
             char refill_pcb[16] = "0";
 
-            int screen_width = 0;
-            int screen_height = 0;
+            int screen_width;
+            int screen_height;
+
+            char recv_msg[1024] = "No data has been received";
 
             //Positioning {x_pos, y_pos, width, height}
             int cam_panel_info[4]; 
@@ -480,7 +505,9 @@ class UR5GUI : public App {
 
 
 int main(int x, char**){
-    UR5GUI GUI(1280, 720);
+    URSocket* Sock = new URSocket(50005);
+
+    UR5GUI GUI(1280, 720, Sock);
     GUI.Run();
 
     return 0;

@@ -5,7 +5,7 @@ import socket
 # specify Host and Port 
 #Listen to all incoming requests by setting host to be empty
 HOST = '' 
-PORT = 50000
+PORT = 50005
 
 soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -20,6 +20,12 @@ except socket.error as message:
         + message[1])
     sys.exit()
 
+
+def print_socket_info(sock):
+    sock_name = sock.getsockname()
+    print(f"Socket is bound to IP: {sock_name[0]} and port: {sock_name[1]}")
+
+print_socket_info(soc)
 
 print('Socket binding operation completed')
 print('Now listening...')

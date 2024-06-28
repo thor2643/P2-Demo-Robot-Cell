@@ -17,19 +17,23 @@
 EXE = GUIServer
 IMGUI_DIR = libs/imgui
 SRC_DIR = src
+INCLUDE_DIR = include
 BUILD_DIR = test
 SOURCES = $(SRC_DIR)/GUIServer.cpp 
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl2.cpp
+SOURCES += $(SRC_DIR)/URSocket.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(INCLUDE_DIR)
 CXXFLAGS += -g -Wall -Wformat
 LIBS =
 
 ##---------------------------------------------------------------------
 ## BUILD FLAGS PER PLATFORM
+## 
+## Add dependencies to LIBS if needed
 ##---------------------------------------------------------------------
 
 ifeq ($(UNAME_S), Linux) #LINUX
@@ -51,9 +55,9 @@ ifeq ($(UNAME_S), Darwin) #APPLE
 	CFLAGS = $(CXXFLAGS)
 endif
 
-ifeq ($(OS), Windows_NT)
+ifeq ($(OS), Windows_NT) 
 	ECHO_MESSAGE = "MinGW"
-	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32
+	LIBS += -lglfw3 -lgdi32 -lopengl32 -limm32 -lws2_32
 
 	CXXFLAGS += `pkg-config --cflags glfw3`
 	CFLAGS = $(CXXFLAGS)
