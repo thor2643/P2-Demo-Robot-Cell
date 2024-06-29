@@ -16,17 +16,19 @@
 
 EXE = GUIServer
 IMGUI_DIR = libs/imgui
+LIBS_DIR = libs
 SRC_DIR = src
 INCLUDE_DIR = include
 BUILD_DIR = test
 SOURCES = $(SRC_DIR)/GUIServer.cpp 
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl2.cpp
-SOURCES += $(SRC_DIR)/URSocket.cpp
+SOURCES += $(LIBS_DIR)/tinyxml2/tinyxml2.cpp
+SOURCES += $(SRC_DIR)/URSocket.cpp $(SRC_DIR)/Decoder.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(INCLUDE_DIR)
+CXXFLAGS = -std=c++11 -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -I$(INCLUDE_DIR) -I$(LIBS_DIR)/tinyxml2
 CXXFLAGS += -g -Wall -Wformat
 LIBS =
 
@@ -74,6 +76,9 @@ $(BUILD_DIR)/%.o:$(IMGUI_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.o:$(IMGUI_DIR)/backends/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%.o:$(LIBS_DIR)/tinyxml2/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.o:$(SRC_DIR)/%.cpp

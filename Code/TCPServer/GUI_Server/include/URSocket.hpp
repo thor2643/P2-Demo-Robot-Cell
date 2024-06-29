@@ -37,7 +37,7 @@ class URSocket {
 
         bool Connected();
         bool AcceptConnection();
-        void HandleConnection(char* msg);
+        bool HandleConnection(char* msg);
         void Send();
         void Disconnect();
 

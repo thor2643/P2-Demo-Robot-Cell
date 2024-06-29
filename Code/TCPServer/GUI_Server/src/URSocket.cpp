@@ -186,7 +186,7 @@ bool URSocket::AcceptConnection(){
 
 
 
-void URSocket::HandleConnection(char* msg){
+bool URSocket::HandleConnection(char* msg){
     char recv_buf[1024];
     int result = recv(_socket, recv_buf, 1024, 0);
 
@@ -196,30 +196,27 @@ void URSocket::HandleConnection(char* msg){
         int error_code = GetError();
 
         if (error_code == WSAEWOULDBLOCK) {
-            return;
+            return false;
         } else if (error_code == WSAENOTSOCK) {
-            std::cout << "FATAL ERROR: Failed to recv as socket is no valid: Error " << error_code << std::endl;
+            // TODO: Enable reconnection
+            std::cout << "FATAL ERROR: Failed to recv as socket is not valid: Error " << error_code << std::endl;
             SockClose(_socket);
-            return;
+            return false;
         } else {
             std::cout << "FATAL ERROR: Failed to recv: Error " << error_code << std::endl;
             SockClose(_socket);
-            return;
+            return false;
         }
 
-    }
+    } else {
+        // Else handle received data
+        printf("Bytes received: %d\n", result);
 
-    // Else handle received data
-    printf("Bytes received: %d\n", result);
+        // Copy received buffer into msg pointer
+        strcpy(msg, recv_buf);
 
-    // Put the recv bytes into msg and format it as a string
-    sprintf(msg, "%s", recv_buf);
-
-
-
-
-
-
+        return true;
+    } 
 }
 
 void URSocket::Send(){

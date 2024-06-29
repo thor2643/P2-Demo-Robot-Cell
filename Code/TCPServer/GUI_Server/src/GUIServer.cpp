@@ -1,5 +1,6 @@
 #include "app.hpp"
 #include "URSocket.hpp"
+#include "Decoder.hpp"
 
 // This is a special compile scenario, where only a header is given.
 // No cpp file is needed and there the file is also not mentioned in the makefile.
@@ -12,6 +13,7 @@ class UR5GUI : public App {
     public:
         UR5GUI(int width, int height, URSocket* sock):App(width, height), _URSocket(sock), screen_width(width), screen_height(height){
             InitPanelSizes();
+            InitUpdStruct();
             std::cout << "Initialising GUI\n";
             bool ret = LoadTextureFromFile("../P2_Cell_Static.png", &my_image_texture, &my_image_width, &my_image_height);
             IM_ASSERT(ret);
@@ -38,8 +40,17 @@ class UR5GUI : public App {
             {
                 //std::cout << "handling a connection..." << std::endl;
                 show_test_popup = true;
+
                 // handle the current connection and update state
-                _URSocket->HandleConnection(recv_msg);
+                if(_URSocket->HandleConnection(recv_msg)){
+                    _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
+                        printf("State: %s\n", _UpdValsChar.state);
+                        printf("Units Produced: %s\n", _UpdValsChar.units_produced);
+                        printf("Numbers of blue left: %s\n", _UpdValsChar.blue_bot_left);
+                        printf("Numbers of fuses left: %s\n\n", _UpdValsChar.fuses_left);
+                }
+                
+                
             }
 
             // Resize the window to fit the glfw window.
@@ -230,19 +241,18 @@ class UR5GUI : public App {
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent(65);
-            ImGui::Text("IDLE");
+            ImGui::Text(_UpdValsChar.state);
 
             ImGui::EndChild();
             
-
             // Units produced
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  first_row_ypos), ImGuiCond_Always);
             ImGui::BeginChild("Units Produced", ImVec2((int)(dash_panel_info[2]/3), first_row_height), child_flags, window_flags);
             ImGui::TextUnformatted("Units Produced");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Indent(80);
-            ImGui::Text("4");
+            ImGui::Indent(80);    
+            ImGui::Text(_UpdValsChar.units_produced);
             ImGui::EndChild();
 
             // Units ordered
@@ -252,23 +262,20 @@ class UR5GUI : public App {
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent(80);
-            ImGui::Text("12");
+            ImGui::Text(_UpdValsChar.units_ordered);
 
             ImGui::EndChild();
 
             // Bottom covers left
-            // TODO: change to state variable from robot or arduino
-            float blue_bot_left = 4;
-            float pink_bot_left = 8;
-            float black_bot_left = 2;
-            float max_bot_covers = 10;
-            char blue_bot_buf[16];
-            char pink_bot_buf[16];
-            char black_bot_buf[16];
-            char max_bot_buf[16];
-            sprintf(blue_bot_buf, "%d", (int)blue_bot_left);
-            sprintf(pink_bot_buf, "%d", (int)pink_bot_left);
-            sprintf(black_bot_buf, "%d", (int)black_bot_left);
+            static float blue_bot_left;
+            static float pink_bot_left;
+            static float black_bot_left;
+            static float max_bot_covers = 10;
+            static char max_bot_buf[16];
+
+            blue_bot_left = atof(_UpdValsChar.blue_bot_left);
+            pink_bot_left = atof(_UpdValsChar.pink_bot_left);
+            black_bot_left = atof(_UpdValsChar.black_bot_left);
             sprintf(max_bot_buf, "/%d", (int)max_bot_covers);
             
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], second_row_ypos), ImGuiCond_Always);
@@ -276,28 +283,26 @@ class UR5GUI : public App {
             ImGui::TextUnformatted("Bottom covers left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_bot_left/max_bot_covers), ImVec2(100, 0.f), blue_bot_buf);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_bot_left/max_bot_covers), ImVec2(100, 0.f), _UpdValsChar.blue_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_bot_left/max_bot_covers), ImVec2(100, 0.f), pink_bot_buf);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_bot_left/max_bot_covers), ImVec2(100, 0.f), _UpdValsChar.pink_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_bot_left/max_bot_covers), ImVec2(100, 0.f), black_bot_buf);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_bot_left/max_bot_covers), ImVec2(100, 0.f), _UpdValsChar.black_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
 
             ImGui::EndChild();
 
             // Top covers left
-            float blue_top_left = 7;
-            float pink_top_left = 10;
-            float black_top_left = 1;
-            float max_top_covers = 10;
-            char blue_top_buf[16];
-            char pink_top_buf[16];
-            char black_top_buf[16];
-            char max_top_buf[16];
-            sprintf(blue_top_buf, "%d", (int)blue_top_left);
-            sprintf(pink_top_buf, "%d", (int)pink_top_left);
-            sprintf(black_top_buf, "%d", (int)black_top_left);
+            static float blue_top_left;
+            static float pink_top_left;
+            static float black_top_left;
+            static float max_top_covers = 10;
+            static char max_top_buf[16];
+
+            blue_top_left = atof(_UpdValsChar.blue_top_left);
+            pink_top_left = atof(_UpdValsChar.pink_top_left);
+            black_top_left = atof(_UpdValsChar.black_top_left);
             sprintf(max_top_buf, "/%d", (int)max_top_covers);
 
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  second_row_ypos), ImGuiCond_Always);
@@ -305,48 +310,49 @@ class UR5GUI : public App {
             ImGui::TextUnformatted("Top covers left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_top_left/max_top_covers), ImVec2(100, 0.f), blue_top_buf);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_top_left/max_top_covers), ImVec2(100, 0.f), _UpdValsChar.blue_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_top_left/max_top_covers), ImVec2(100, 0.f), pink_top_buf);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_top_left/max_top_covers), ImVec2(100, 0.f), _UpdValsChar.pink_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_top_left/max_top_covers), ImVec2(100, 0.f), black_top_buf);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_top_left/max_top_covers), ImVec2(100, 0.f), _UpdValsChar.black_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
 
             ImGui::EndChild();
 
             // Fuses left
-            float fuses_left = 45;
-            float max_fuses = 100;
-            char fuses_buf[16];
-            char max_fuses_buf[16];
-            sprintf(fuses_buf, "%d", (int)fuses_left);
+            static float fuses_left;  
+            static float max_fuses = 100;
+            static char max_fuses_buf[16];
+
+            fuses_left = atof(_UpdValsChar.fuses_left);
             sprintf(max_fuses_buf, "/%d", (int)max_fuses);
+
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3), second_row_ypos), ImGuiCond_Always);
             ImGui::BeginChild("Fuses left", ImVec2((int)(dash_panel_info[2]/3), (int)(second_row_height/2)), child_flags, window_flags);
             ImGui::TextUnformatted("Fuses left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent();
-            ImGui::ProgressBar((float)(fuses_left/max_fuses), ImVec2(100, 0.f), fuses_buf);ImGui::SameLine(); ImGui::Text(max_fuses_buf);
-            //ImGui::Text("46");
+            ImGui::ProgressBar((float)(fuses_left/max_fuses), ImVec2(100, 0.f), _UpdValsChar.fuses_left);ImGui::SameLine(); ImGui::Text(max_fuses_buf);
 
             ImGui::EndChild();
 
             // PCB's left
-            float pcb_left = 2;
-            float max_pcb = 4;
-            char pcb_buf[16];
-            char max_pcb_buf[16];
-            sprintf(pcb_buf, "%d", (int)pcb_left);
+            static float pcb_left; 
+            static float max_pcb = 4;
+            static char max_pcb_buf[16];
+
+            pcb_left = atof(_UpdValsChar.pcb_left);
             sprintf(max_pcb_buf, "/%d", (int)max_pcb);
+
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3),  second_row_ypos + (int)(second_row_height/2)), ImGuiCond_Always);
             ImGui::BeginChild("PCB's left", ImVec2((int)(dash_panel_info[2]/3), (int)(second_row_height/2)), child_flags, window_flags);
             ImGui::TextUnformatted("PCB's left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent();
-            ImGui::ProgressBar((float)(pcb_left/max_pcb), ImVec2(100, 0.f), pcb_buf);ImGui::SameLine(); ImGui::Text(max_pcb_buf);
+            ImGui::ProgressBar((float)(pcb_left/max_pcb), ImVec2(100, 0.f), _UpdValsChar.pcb_left);ImGui::SameLine(); ImGui::Text(max_pcb_buf);
 
             ImGui::EndChild();
             
@@ -463,8 +469,13 @@ class UR5GUI : public App {
             bool show_test_popup = false;
             int my_image_width = 0;
             int my_image_height = 0;
+
             GLuint my_image_texture = 0;
             URSocket* _URSocket;
+            Decoder _Decoder;
+
+            //UpdateValues _UpdVals;
+            UpdateValuesChars _UpdValsChar;
 
             char refill_bot_blue[16] = "0";
             char refill_bot_pink[16] = "0";
@@ -478,7 +489,14 @@ class UR5GUI : public App {
             int screen_width;
             int screen_height;
 
-            char recv_msg[1024] = "No data has been received";
+            char recv_msg[1024] = "<update_msg>"
+                                    "<assembled_phone>100</assembled_phone>"
+                                    "<components_left>"
+                                    "<top_blue>-90</top_blue><top_pink>10</top_pink><top_black>10</top_black>"
+                                    "<bottom_blue>-90</bottom_blue><bottom_pink>10</bottom_pink><bottom_black>10</bottom_black>"
+                                    "<fuses>-90</fuses><pcb>-1</pcb>"
+                                    "</components_left>"
+                                    "</update_msg>";
 
             //Positioning {x_pos, y_pos, width, height}
             int cam_panel_info[4]; 
@@ -498,6 +516,20 @@ class UR5GUI : public App {
                 dash_panel_info[1] = 0;
                 dash_panel_info[2] = screen_width - cam_panel_info[2];
                 dash_panel_info[3] = screen_height;
+            }
+
+            void InitUpdStruct() {
+                strcpy(_UpdValsChar.state, "IDLE");
+                strcpy(_UpdValsChar.units_produced, "0");
+                strcpy(_UpdValsChar.units_ordered, "24");
+                strcpy(_UpdValsChar.blue_bot_left, "10");
+                strcpy(_UpdValsChar.blue_top_left, "10");
+                strcpy(_UpdValsChar.pink_bot_left, "10");
+                strcpy(_UpdValsChar.pink_top_left, "10");
+                strcpy(_UpdValsChar.black_bot_left, "10");
+                strcpy(_UpdValsChar.black_top_left, "10");
+                strcpy(_UpdValsChar.fuses_left, "100");
+                strcpy(_UpdValsChar.pcb_left, "4");
             }
 
 };
