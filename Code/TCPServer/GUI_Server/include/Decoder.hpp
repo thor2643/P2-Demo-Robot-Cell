@@ -9,6 +9,7 @@ struct UpdateValuesChars {
 
     char units_produced[8];
     char units_ordered[8];
+    char cycle_time[8];
 
     char blue_bot_left[8];
     char pink_bot_left[8];

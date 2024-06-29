@@ -10,10 +10,11 @@ Decoder::~Decoder(){
 
 void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
 
-    /* Received message will look something like this
+    /* Received message will look something like this 
         "<update_msg>"
         "<robot_state>RUNNING</robot_state>"
         "<assembled_phones>100</assembled_phones>"
+        "<cycle_time>14.856</cycle_time>"
         "<components_left>"
         "<top_blue>5</top_blue><top_pink>10</top_pink><top_black>10</top_black>"
         "<bottom_blue>8</bottom_blue><bottom_pink>10</bottom_pink><bottom_black>3</bottom_black>"
@@ -37,6 +38,7 @@ void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
 
     tinyxml2::XMLElement* state = mainElement->FirstChildElement("robot_state");
     tinyxml2::XMLElement* units_produced = mainElement->FirstChildElement("assembled_phones");
+    tinyxml2::XMLElement* cycle_time = mainElement->FirstChildElement("cycle_time");
     tinyxml2::XMLElement* components_left = mainElement->FirstChildElement("components_left");
     tinyxml2::XMLElement* blue_top_left = components_left->FirstChildElement("top_blue");
     tinyxml2::XMLElement* pink_top_left = components_left->FirstChildElement("top_pink");
@@ -51,6 +53,7 @@ void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
     // Copy valuee into upd_vals struct
     strcpy(upd_vals->state, state->GetText());
     strcpy(upd_vals->units_produced, units_produced->GetText());
+    strcpy(upd_vals->cycle_time, cycle_time->GetText());
     strcpy(upd_vals->blue_top_left, blue_top_left->GetText());
     strcpy(upd_vals->pink_top_left, pink_top_left->GetText());
     strcpy(upd_vals->black_top_left, black_top_left->GetText());

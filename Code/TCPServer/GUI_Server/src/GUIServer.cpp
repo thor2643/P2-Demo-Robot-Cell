@@ -232,7 +232,7 @@ class UR5GUI : public App {
             static int first_row_ypos = 25;
             static int first_row_height = 75;
             static int second_row_ypos = first_row_ypos + first_row_height;
-            static int second_row_height = 150;
+            static int second_row_height = 75;
             static int third_row_ypos = second_row_ypos + second_row_height;
             static int third_row_height = 150;
             ImGuiChildFlags child_flags = ImGuiChildFlags_Border;
@@ -275,6 +275,40 @@ class UR5GUI : public App {
 
             ImGui::EndChild();
 
+            // Cycle time
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], second_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Cycle time", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Cycle Time");
+            ImGui::Separator();
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            ImGui::Indent(65);
+            static char cycle_time[8];
+            sprintf(cycle_time, "%s s", _UpdValsChar.cycle_time);
+            ImGui::Text(cycle_time); // Update from UR
+
+            ImGui::EndChild();
+            
+            // Producing time
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  second_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Producing time ratio", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Producing Time Ratio");
+            ImGui::Separator();
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            ImGui::Indent(80);    
+            ImGui::Text("77.7%%"); // Update from UR
+            ImGui::EndChild();
+
+            // Up time
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3),  second_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Up time", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Up Time Ratio");
+            ImGui::Separator();
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
+            ImGui::Indent(80);
+            ImGui::Text("93%%");
+
+            ImGui::EndChild();
+
             // Bottom covers left
             static float blue_bot_left;
             static float pink_bot_left;
@@ -287,9 +321,9 @@ class UR5GUI : public App {
             black_bot_left = atof(_UpdValsChar.black_bot_left);
             sprintf(max_bot_buf, "/%d", (int)max_bot_covers);
             
-            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], second_row_ypos), ImGuiCond_Always);
-            ImGui::BeginChild("Bottom covers left", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
-            ImGui::TextUnformatted("Bottom covers left");
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], third_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Bottom covers left", ImVec2((int)(dash_panel_info[2]/3), third_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Bottom Covers Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_bot_left/max_bot_covers), ImVec2(100, 0.f), _UpdValsChar.blue_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
@@ -314,9 +348,9 @@ class UR5GUI : public App {
             black_top_left = atof(_UpdValsChar.black_top_left);
             sprintf(max_top_buf, "/%d", (int)max_top_covers);
 
-            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  second_row_ypos), ImGuiCond_Always);
-            ImGui::BeginChild("Top covers left", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
-            ImGui::TextUnformatted("Top covers left");
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  third_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Top covers left", ImVec2((int)(dash_panel_info[2]/3), third_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Top Covers Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_top_left/max_top_covers), ImVec2(100, 0.f), _UpdValsChar.blue_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
@@ -337,9 +371,9 @@ class UR5GUI : public App {
             fuses_left = atof(_UpdValsChar.fuses_left);
             sprintf(max_fuses_buf, "/%d", (int)max_fuses);
 
-            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3), second_row_ypos), ImGuiCond_Always);
-            ImGui::BeginChild("Fuses left", ImVec2((int)(dash_panel_info[2]/3), (int)(second_row_height/2)), child_flags, window_flags);
-            ImGui::TextUnformatted("Fuses left");
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3), third_row_ypos), ImGuiCond_Always);
+            ImGui::BeginChild("Fuses left", ImVec2((int)(dash_panel_info[2]/3), (int)(third_row_height/2)), child_flags, window_flags);
+            ImGui::TextUnformatted("Fuses Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent();
@@ -355,9 +389,9 @@ class UR5GUI : public App {
             pcb_left = atof(_UpdValsChar.pcb_left);
             sprintf(max_pcb_buf, "/%d", (int)max_pcb);
 
-            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3),  second_row_ypos + (int)(second_row_height/2)), ImGuiCond_Always);
-            ImGui::BeginChild("PCB's left", ImVec2((int)(dash_panel_info[2]/3), (int)(second_row_height/2)), child_flags, window_flags);
-            ImGui::TextUnformatted("PCB's left");
+            ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0] + 2*(int)(dash_panel_info[2]/3),  third_row_ypos + (int)(third_row_height/2)), ImGuiCond_Always);
+            ImGui::BeginChild("PCB's left", ImVec2((int)(dash_panel_info[2]/3), (int)(third_row_height/2)), child_flags, window_flags);
+            ImGui::TextUnformatted("PCB's Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
             ImGui::Indent();
@@ -365,7 +399,7 @@ class UR5GUI : public App {
 
             ImGui::EndChild();
             
-            
+            /*
             //Creates the section with the graphs.
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0],  second_row_ypos + (int)(second_row_height)), ImGuiCond_Always);
             ImGui::BeginChild("Graphs", ImVec2((int)(dash_panel_info[2]), (int)(screen_height - second_row_ypos + (int)(second_row_height))), child_flags, window_flags);
@@ -400,6 +434,7 @@ class UR5GUI : public App {
             ImGui::PlotLines(" ", acc_arr, IM_ARRAYSIZE(acc_arr), 0, "", -1.0f, 1.0f, ImVec2(dash_panel_info[2]-30, 110.0f));
 
             ImGui::EndChild(); // Graph child
+            */
 
             ImGui::EndChild(); // Dashboard child
         }
@@ -525,7 +560,8 @@ class UR5GUI : public App {
             void InitUpdStruct() {
                 strcpy(_UpdValsChar.state, "IDLE");
                 strcpy(_UpdValsChar.units_produced, "0");
-                strcpy(_UpdValsChar.units_ordered, "24");
+                strcpy(_UpdValsChar.units_ordered, "0");
+                strcpy(_UpdValsChar.cycle_time, "0");
                 strcpy(_UpdValsChar.blue_bot_left, "10");
                 strcpy(_UpdValsChar.blue_top_left, "10");
                 strcpy(_UpdValsChar.pink_bot_left, "10");
@@ -534,6 +570,7 @@ class UR5GUI : public App {
                 strcpy(_UpdValsChar.black_top_left, "10");
                 strcpy(_UpdValsChar.fuses_left, "100");
                 strcpy(_UpdValsChar.pcb_left, "4");
+                strcpy(_UpdValsChar.cycle_time, "0");
             }
 
 };
