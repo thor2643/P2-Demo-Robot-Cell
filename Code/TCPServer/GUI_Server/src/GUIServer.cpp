@@ -38,16 +38,9 @@ class UR5GUI : public App {
             }
             else 
             {
-                //std::cout << "handling a connection..." << std::endl;
-                show_test_popup = true;
-
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
                     _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
-                        printf("State: %s\n", _UpdValsChar.state);
-                        printf("Units Produced: %s\n", _UpdValsChar.units_produced);
-                        printf("Numbers of blue left: %s\n", _UpdValsChar.blue_bot_left);
-                        printf("Numbers of fuses left: %s\n\n", _UpdValsChar.fuses_left);
                 }
                 
                 
@@ -143,18 +136,19 @@ class UR5GUI : public App {
             ImGui::Text("BOTTOM  covers");ImGui::SameLine();ImGui::Text("  TOP");
             ImGui::Spacing();
             ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4);
-            ImGui::InputText(" Blue ", refill_bot_blue, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText(" ", refill_top_blue, 16);
+            ImGui::InputText(" Blue ", refill_bot_blue, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText("##blue2", refill_top_blue, 16);
             ImGui::Spacing();
             ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); 
-            ImGui::InputText(" Pink ", refill_bot_pink, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText(" ", refill_top_pink, 16);
+            ImGui::InputText(" Pink ", refill_bot_pink, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText("##pink2", refill_top_pink, 16);
             ImGui::Spacing();
             ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4);
-            ImGui::InputText(" Black", refill_bot_black, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText(" ", refill_top_pink, 16);
+            ImGui::InputText(" Black", refill_bot_black, 16); ImGui::SameLine(); ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4); ImGui::InputText("##black2", refill_top_black, 16);
             ImGui::Spacing(); ImGui::Spacing();
             
             ImGui::Indent(65);
             if (ImGui::Button("ADD")) {
-                show_test_popup = true;
+                sprintf(send_msg, "5,%s,%s,%s,%s,%s,%s", refill_bot_blue, refill_bot_pink, refill_bot_black, refill_top_blue, refill_top_pink, refill_top_black);
+                _URSocket->Send(send_msg);
             }
             ImGui::EndChild(); // Cover child
 
@@ -165,10 +159,12 @@ class UR5GUI : public App {
             ImGui::Text("Fuses");
             ImGui::Spacing();
             ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4);
-            ImGui::InputText(" ", refill_fuses, 16);
+            ImGui::InputText("##Fuses", refill_fuses, 16);
             ImGui::SameLine();
-            if (ImGui::Button("ADD")) {
-                show_test_popup = true;
+
+            if (ImGui::Button("ADD##1")) {
+                sprintf(send_msg, "6,%s", refill_fuses);
+                _URSocket->Send(send_msg);
             }
 
 
@@ -176,11 +172,14 @@ class UR5GUI : public App {
             ImGui::Text("PCB's");
             ImGui::Spacing();
             ImGui::SetNextItemWidth(ImGui::GetFontSize() * 4);
-            ImGui::InputText(" ", refill_pcb, 16);
+            ImGui::InputText("##PCBs", refill_pcb, 16);
             ImGui::SameLine();
-            if (ImGui::Button("ADD")) {
-                show_test_popup = true;
+            if (ImGui::Button("ADD##2")) {
+                TestPopupWindow();
+                sprintf(send_msg, "7,%s", refill_pcb);
+                _URSocket->Send(send_msg);
             }
+
 
             ImGui::EndChild(); // FusePCB child
 
@@ -196,19 +195,23 @@ class UR5GUI : public App {
             ImGui::Indent(45);
 
             if (ImGui::Button("Conventional\n  Program", ImVec2(ImGui::GetFontSize() * 8, 0))) {
-                show_test_popup = true;
+                strcpy(send_msg, "1RUN SIMPLE");
+                _URSocket->Send(send_msg);
             }
             ImGui::Spacing();
             if (ImGui::Button("Fast Program", ImVec2(ImGui::GetFontSize() * 8, 0))) {
-                show_test_popup = true;
+                strcpy(send_msg, "3RUN FAST");
+                _URSocket->Send(send_msg);
             }
             ImGui::Spacing();
             if (ImGui::Button("Stop Program", ImVec2(ImGui::GetFontSize() * 8, 0))) {
-                show_test_popup = true;
+                strcpy(send_msg, "2STOP PROGRAM");
+                _URSocket->Send(send_msg);
             }
             ImGui::Spacing();
             if (ImGui::Button("EMERGENCY\n  STOP", ImVec2(ImGui::GetFontSize() * 8, 0))) {
-                show_test_popup = true;
+                strcpy(send_msg, "4STOP");
+                _URSocket->Send(send_msg);
             }
 
             ImGui::EndChild(); // URCommand child
@@ -226,15 +229,21 @@ class UR5GUI : public App {
             ImGui::Separator();
 
             // A lot of copy pasting with small modification to create the dashboard panels
-            int first_row_ypos = 25;
-            int first_row_height = 75;
-            int second_row_ypos = first_row_ypos + first_row_height;
-            int second_row_height = 150;
+            static int first_row_ypos = 25;
+            static int first_row_height = 75;
+            static int second_row_ypos = first_row_ypos + first_row_height;
+            static int second_row_height = 150;
+            static int third_row_ypos = second_row_ypos + second_row_height;
+            static int third_row_height = 150;
             ImGuiChildFlags child_flags = ImGuiChildFlags_Border;
 
             // State
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], first_row_ypos), ImGuiCond_Always);
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(255, 0, 0, 100));
+            if (strcmp(_UpdValsChar.state, "RUNNING") == 0){
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 255, 0, 100));
+            } else {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(255, 0, 0, 100));
+            }
             ImGui::BeginChild("State", ImVec2((int)(dash_panel_info[2]/3), first_row_height), child_flags, window_flags);
             ImGui::PopStyleColor();
             ImGui::TextUnformatted("State");
@@ -356,7 +365,7 @@ class UR5GUI : public App {
 
             ImGui::EndChild();
             
-
+            
             //Creates the section with the graphs.
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0],  second_row_ypos + (int)(second_row_height)), ImGuiCond_Always);
             ImGui::BeginChild("Graphs", ImVec2((int)(dash_panel_info[2]), (int)(screen_height - second_row_ypos + (int)(second_row_height))), child_flags, window_flags);
@@ -489,14 +498,9 @@ class UR5GUI : public App {
             int screen_width;
             int screen_height;
 
-            char recv_msg[1024] = "<update_msg>"
-                                    "<assembled_phone>100</assembled_phone>"
-                                    "<components_left>"
-                                    "<top_blue>-90</top_blue><top_pink>10</top_pink><top_black>10</top_black>"
-                                    "<bottom_blue>-90</bottom_blue><bottom_pink>10</bottom_pink><bottom_black>10</bottom_black>"
-                                    "<fuses>-90</fuses><pcb>-1</pcb>"
-                                    "</components_left>"
-                                    "</update_msg>";
+            char recv_msg[1024];
+
+            char send_msg[1024];
 
             //Positioning {x_pos, y_pos, width, height}
             int cam_panel_info[4]; 

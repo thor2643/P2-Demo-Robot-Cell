@@ -201,10 +201,17 @@ bool URSocket::HandleConnection(char* msg){
             // TODO: Enable reconnection
             std::cout << "FATAL ERROR: Failed to recv as socket is not valid: Error " << error_code << std::endl;
             SockClose(_socket);
+            _connected = false;
             return false;
-        } else {
+        } else if (result == 0 || error_code == WSAECONNRESET) {
+            std::cout << "Failed to send: socket closed: " << error_code << "\n";
+            SockClose(_socket);
+            _connected = false;
+            return false;
+        }else {
             std::cout << "FATAL ERROR: Failed to recv: Error " << error_code << std::endl;
             SockClose(_socket);
+            _connected = false;
             return false;
         }
 
@@ -219,9 +226,33 @@ bool URSocket::HandleConnection(char* msg){
     } 
 }
 
-void URSocket::Send(){
+void URSocket::Send(char* msg){
+    int result = send(_socket, msg, (int)strlen(msg), 0);
 
+    if (result <= 0) {
+        int err = GetError();
+        if (err == WSAEWOULDBLOCK) {
+            std::cout << "Failed to send: would block: " << err << "\n";
+            return;
+        }
+
+        // returning 0 or WSAECONNRESET means closed by host
+        if (result == 0 || err == WSAECONNRESET) {
+            std::cout << "Failed to send: socket closed: " << err << "\n";
+            SockClose(_socket);
+            _connected = false;
+        }
+        else
+        {
+            // everything else is error
+            std::cout << "Failed to send: send Error: " << err;
+            SockClose(_socket);
+            _connected = false;
+        }
+        return;
+    }
 }
+
 
 void URSocket::Disconnect(){
 

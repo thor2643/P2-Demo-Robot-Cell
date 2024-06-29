@@ -3,24 +3,7 @@
 
 #include "tinyxml2.h"
 
-/*
-struct UpdateValues {
-    char state[16];
-
-    int units_produced;
-    int units_ordered;
-
-    int blue_bot_left;
-    int pink_bot_left;
-    int black_bot_left;
-    int blue_top_left;
-    int pink_top_left;
-    int black_top_left;
-    int fuses_left;
-    int pcb_left;    
-};
-*/
-
+// Used to store the incoming data from the UR robot
 struct UpdateValuesChars {
     char state[16];
 
@@ -37,7 +20,8 @@ struct UpdateValuesChars {
     char pcb_left[8];    
 };
 
-
+// Decoder conatining decoder function for different messages.
+// Currently only the update message is received from the UR robot.
 class Decoder {
     public:
         Decoder();

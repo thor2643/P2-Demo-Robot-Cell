@@ -22,6 +22,7 @@
   #define SOCKET_ERROR -1
   #define WSAEWOULDBLOCK EWOULDBLOCK 
   #define WSAENOTSOCK ENOTSOCK
+  #define WSAECONNRESET ECONNRESET
   int REUSABLE = 1;
 
 #endif
@@ -38,7 +39,7 @@ class URSocket {
         bool Connected();
         bool AcceptConnection();
         bool HandleConnection(char* msg);
-        void Send();
+        void Send(char* msg);
         void Disconnect();
 
 

@@ -9,21 +9,18 @@ Decoder::~Decoder(){
 }
 
 void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
-    // Put the recv bytes into msg and format it as a string
-    //sprintf(recv_buf, "%s", recv_buf);
 
-    /*
-    static const char* xml =    "<update_msg>"
-                                "<robot_state>RUNNING</robot_state>"
-                                "<assembled_phones>100</assembled_phones>"
-                                "<components_left>"
-                                "<top_blue>54</top_blue><top_pink>10</top_pink><top_black>10</top_black>"
-                                "<bottom_blue>-90</bottom_blue><bottom_pink>10</bottom_pink><bottom_black>10</bottom_black>"
-                                "<fuses>-90</fuses><pcb>-1</pcb>"
-                                "</components_left>"
-                                "</update_msg>";
+    /* Received message will look something like this
+        "<update_msg>"
+        "<robot_state>RUNNING</robot_state>"
+        "<assembled_phones>100</assembled_phones>"
+        "<components_left>"
+        "<top_blue>5</top_blue><top_pink>10</top_pink><top_black>10</top_black>"
+        "<bottom_blue>8</bottom_blue><bottom_pink>10</bottom_pink><bottom_black>3</bottom_black>"
+        "<fuses>54</fuses><pcb>2</pcb>"
+        "</components_left>"
+        "</update_msg>";
     */
-
     
 	tinyxml2::XMLDocument doc;
 
@@ -62,21 +59,5 @@ void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
     strcpy(upd_vals->black_bot_left, black_bot_left->GetText());
     strcpy(upd_vals->fuses_left, fuses_left->GetText());
     strcpy(upd_vals->pcb_left, pcb_left->GetText());
-
-
-    /*
-    upd_vals->units_produced = atoi(units_produced->GetText());
-    upd_vals->units_ordered = 24;
-    upd_vals->blue_bot_left = atoi(blue_bot_left->GetText());
-    upd_vals->pink_bot_left = atoi(pink_bot_left->GetText());
-    upd_vals->black_bot_left = atoi(black_bot_left->GetText());
-    upd_vals->blue_top_left = atoi(blue_top_left->GetText());
-    upd_vals->pink_top_left = atoi(pink_top_left->GetText());
-    upd_vals->black_top_left = atoi(black_top_left->GetText());
-    upd_vals->fuses_left = atoi(fuses_left->GetText());
-    upd_vals->pcb_left = atoi(pcb_left->GetText());
-    */
-    
-	//return doc.ErrorID();
 }
 
