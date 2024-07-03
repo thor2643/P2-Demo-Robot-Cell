@@ -62,6 +62,7 @@ class App {
             ImGuiIO& io = ImGui::GetIO(); (void)io;
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+            io.Fonts->AddFontFromFileTTF("../libs/imgui/misc/fonts/Roboto-Medium.ttf", 20);
 
             // Setup Dear ImGui style
             ImGui::StyleColorsDark();

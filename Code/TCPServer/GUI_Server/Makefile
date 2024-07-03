@@ -14,13 +14,15 @@
 #CXX = g++
 #CXX = clang++
 
-EXE = GUIServer
+#Uncomment the executable that you want to create
+EXE = GUIServerSmall 
+#EXE = GUIServer 
 IMGUI_DIR = libs/imgui
 LIBS_DIR = libs
 SRC_DIR = src
 INCLUDE_DIR = include
 BUILD_DIR = test
-SOURCES = $(SRC_DIR)/GUIServer.cpp 
+SOURCES = $(SRC_DIR)/$(EXE).cpp 
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_glfw.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl2.cpp
 SOURCES += $(LIBS_DIR)/tinyxml2/tinyxml2.cpp
