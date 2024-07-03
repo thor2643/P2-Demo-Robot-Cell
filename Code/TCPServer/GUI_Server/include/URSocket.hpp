@@ -9,7 +9,7 @@
   #include <winsock2.h>
   #include <Ws2tcpip.h>
 
-  const char REUSABLE = '1';
+  const char REUSABLE_TRUE = '1';
 
 #else
   /* Assume that any non-Windows platform uses POSIX-style sockets instead. */
@@ -17,6 +17,9 @@
   #include <arpa/inet.h>
   #include <netdb.h>  /* Needed for getaddrinfo() and freeaddrinfo() */
   #include <unistd.h> /* Needed for close() */
+  #include <fcntl.h>
+  #include <errno.h>
+  
   typedef int SOCKET;
   #define INVALID_SOCKET -1
   #define SOCKET_ERROR -1
@@ -26,9 +29,11 @@
   #define WSAEISCONN EISCONN
   #define WSAEALREADY EALREADY
   #define WSAEINVAL EINPROGRESS
-  int REUSABLE = 1;
+  int REUSABLE_TRUE = 1;
 
 #endif
+
+#include <cstring>
 
 class URSocket {
     public:
