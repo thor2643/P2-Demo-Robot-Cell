@@ -9,7 +9,7 @@
   #include <winsock2.h>
   #include <Ws2tcpip.h>
 
-  const char REUSABLE_TRUE = '1';
+  const char REUSABLE = '1';
 
 #else
   /* Assume that any non-Windows platform uses POSIX-style sockets instead. */
@@ -29,7 +29,7 @@
   #define WSAEISCONN EISCONN
   #define WSAEALREADY EALREADY
   #define WSAEINVAL EINPROGRESS
-  int REUSABLE_TRUE = 1;
+  int REUSABLE = 1;
 
 #endif
 

@@ -72,7 +72,7 @@ int URSocket::SockInit(int port)
 	}
 
     // set socket to reusable
-    if (setsockopt(_server_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE_TRUE, sizeof(int)) == -1) {
+    if (setsockopt(_server_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE, sizeof(int)) == -1) {
         std::cout << "Failed to reuse address\n";
         SockClose(_server_socket);
         return false;
@@ -276,7 +276,7 @@ int RoboDKClient::SockInit(){
 	}
 
     // set socket to reusable
-    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE_TRUE, sizeof(int)) == -1) {
+    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE, sizeof(int)) == -1) {
         std::cout << "Failed to reuse address\n";
         SockClose(_socket);
         return false;
@@ -348,7 +348,7 @@ bool RoboDKClient::Connect(const char* host, int port){
     }
 
     // set socket to reusable
-    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE_TRUE, sizeof(int)) == -1) {
+    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE, sizeof(int)) == -1) {
         std::cout << "Failed to reuse address\n";
         SockClose(_socket);
         return false;
