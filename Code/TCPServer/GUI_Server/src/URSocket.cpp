@@ -44,9 +44,9 @@ URSocket::URSocket(int port): _connected(false){
 
     if(SockInit(port) != true) {
         std::cout << "Failed to init Socket\n";
-    }  
-
-    std::cout << "Done initialising socket" << std::endl;       
+    } else {
+        std::cout << "Done initialising socket" << std::endl; 
+    }      
 }
 
 URSocket::~URSocket(){
@@ -139,23 +139,6 @@ bool URSocket::AcceptConnection(){
     struct sockaddr_in addr;
     socklen_t addrLen = sizeof(addr);
 
-
-    /* Used for debugging connections. Prints if any incoming connections are available.
-    fd_set read_fds;
-    FD_ZERO(&read_fds);
-    FD_SET(_server_socket, &read_fds);
-
-    timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
-
-    int result = select(_server_socket + 1, &read_fds, NULL, NULL, &timeout);
-    if (result > 0 && FD_ISSET(_server_socket, &read_fds)) {
-        std::cout << "There are pending connections" << std::endl;
-    } else {
-        std::cout << "No pending connections" << std::endl;
-    }*/
-
     SOCKET socket = accept(_server_socket, (struct sockaddr*)&addr, &addrLen);
 
     if (socket == INVALID_SOCKET) {
@@ -183,8 +166,6 @@ bool URSocket::AcceptConnection(){
     return true;
 
 }
-
-
 
 bool URSocket::HandleConnection(char* msg){
     char recv_buf[1024];
@@ -253,11 +234,208 @@ void URSocket::Send(char* msg){
     }
 }
 
-
 void URSocket::Disconnect(){
 
 }
 
 bool URSocket::Connected(){
+    return _connected;
+}
+
+
+
+RoboDKClient::RoboDKClient(): _connected(false){ 
+    std::cout << "creating client socket... " << std::endl;   
+    if(SockInit() != true) {
+        std::cout << "Failed to init Socket\n";
+    } else {
+        std::cout << "Socket created succesfully!\n"; 
+    } 
+}
+
+RoboDKClient::~RoboDKClient(){
+    SockClose(_socket);
+    SockQuit();         
+}
+
+int RoboDKClient::SockInit(){
+    #ifdef _WIN32
+        WSADATA wsa_data;
+        WSAStartup(MAKEWORD(1,1), &wsa_data);
+    #else
+        return 0;
+    #endif
+
+    // Create TCP socket
+	_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    
+	if (_socket == INVALID_SOCKET) {
+        std::cout << "Failed to create Socket\n";
+		return false;
+	}
+
+    // set socket to reusable
+    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE, sizeof(int)) == -1) {
+        std::cout << "Failed to reuse address\n";
+        SockClose(_socket);
+        return false;
+    }
+ 
+    // set socket to be non-blocking
+    if(!set_nonblocking(_socket)){
+        std::cout << "Failed to set non-blocking\n";
+        SockClose(_socket);
+        return false;
+    }
+
+    return true;
+}
+
+int RoboDKClient::SockQuit()
+{
+    #ifdef _WIN32
+        return WSACleanup();
+    #else
+        return 0;
+    #endif
+}
+
+int RoboDKClient::SockClose(SOCKET sock){
+    int status = 0;
+
+    #ifdef _WIN32
+    status = shutdown(sock, SD_BOTH);
+    if (status == 0) { status = closesocket(sock); }
+    #else
+    status = shutdown(sock, SHUT_RDWR);
+    if (status == 0) { status = close(sock); }
+    #endif
+    
+    SockQuit();
+    return status;
+
+}
+
+bool RoboDKClient::Connect(const char* host, int port){
+    // Server address
+	struct sockaddr_in serverAddr;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(port); // Port should match the server port
+
+	if (inet_pton(AF_INET, host, &serverAddr.sin_addr) != 1) {
+		std::cout << "Ivalid address\n";
+        SockClose(_socket);
+        return false;
+	}
+
+    // Try to connect to server
+    int result = connect(_socket, (sockaddr*)&serverAddr, sizeof(serverAddr));
+    
+    if (result == SOCKET_ERROR) {
+        int error_code = GetError();
+
+        if (error_code == WSAEWOULDBLOCK || error_code == WSAEALREADY || error_code == WSAEINVAL) {
+            // In non-blockin mode the connect() return error will return error
+            // while it is finishing the connection routine. Read more at winsock2 or sys/socket websites.
+            return false;
+        } else if (error_code == WSAEISCONN){
+            // The socket has connected succesfully and we therefore continue
+        } else {
+            std::cout << "Failed to connect" << error_code << std::endl;
+            return false;
+        }
+    }
+
+    // set socket to reusable
+    if (setsockopt(_socket, SOL_SOCKET, SO_REUSEADDR, &REUSABLE, sizeof(int)) == -1) {
+        std::cout << "Failed to reuse address\n";
+        SockClose(_socket);
+        return false;
+    }
+
+	// set the socket to non-blocking
+    set_nonblocking(_socket);
+
+	std::cout << "Client Connection Established" << std::endl;
+    _connected = true;
+	return true;
+}
+
+bool RoboDKClient::HandleConnection(char* msg){
+    char recv_buf[1024];
+    int result = recv(_socket, recv_buf, 1024, 0);
+
+    // Check if anything has been received or if an error has occured
+    if (result <= 0) 
+    {
+        int error_code = GetError();
+
+        if (error_code == WSAEWOULDBLOCK) {
+            return false;
+        } else if (error_code == WSAENOTSOCK) {
+            // TODO: Enable reconnection
+            std::cout << "FATAL ERROR: Failed to recv as socket is not valid: Error " << error_code << std::endl;
+            SockClose(_socket);
+            _connected = false;
+            return false;
+        } else if (result == 0 || error_code == WSAECONNRESET) {
+            std::cout << "Failed to send: socket closed: " << error_code << "\n";
+            SockClose(_socket);
+            _connected = false;
+            return false;
+        }else {
+            std::cout << "FATAL ERROR: Failed to recv: Error " << error_code << std::endl;
+            SockClose(_socket);
+            _connected = false;
+            return false;
+        }
+
+    } else {
+        // Else handle received data
+        printf("Bytes received: %d\n", result);
+
+        // Copy received buffer into msg pointer
+        strcpy(msg, recv_buf);
+
+        return true;
+    } 
+}
+
+void RoboDKClient::Send(char* msg){
+    int result = send(_socket, msg, (int)strlen(msg), 0);
+
+    if (result <= 0) {
+        int err = GetError();
+        if (err == WSAEWOULDBLOCK) {
+            std::cout << "Failed to send: would block: " << err << "\n";
+            return;
+        }
+
+        // returning 0 or WSAECONNRESET means closed by host
+        if (result == 0 || err == WSAECONNRESET) {
+            std::cout << "Failed to send: socket closed: " << err << "\n";
+            SockClose(_socket);
+            _connected = false;
+        }
+        else
+        {
+            // everything else is error
+            std::cout << "Failed to send: send Error: " << err;
+            SockClose(_socket);
+            _connected = false;
+        }
+        return;
+    }
+}
+
+void RoboDKClient::Disconnect(){
+    // everything else is error
+    std::cout << "Disconnecting and closing socket.\n";
+    SockClose(_socket);
+    _connected = false;
+}
+
+bool RoboDKClient::Connected(){
     return _connected;
 }

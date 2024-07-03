@@ -23,6 +23,9 @@
   #define WSAEWOULDBLOCK EWOULDBLOCK 
   #define WSAENOTSOCK ENOTSOCK
   #define WSAECONNRESET ECONNRESET
+  #define WSAEISCONN EISCONN
+  #define WSAEALREADY EALREADY
+  #define WSAEINVAL EINPROGRESS
   int REUSABLE = 1;
 
 #endif
@@ -50,5 +53,29 @@ class URSocket {
       SOCKET _server_socket;
 
 };
+
+class RoboDKClient {
+    public:
+        RoboDKClient();
+        ~RoboDKClient();
+
+        int SockInit();
+        int SockQuit();
+        int SockClose(SOCKET sock);
+
+        bool Connected();
+        bool Connect(const char* host, int port);
+        bool HandleConnection(char* msg);
+        void Send(char* msg);
+        void Disconnect();
+
+
+    private:
+      bool _connected;
+
+      SOCKET _socket;
+
+};
+
 
 #endif 

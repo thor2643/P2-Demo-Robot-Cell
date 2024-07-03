@@ -11,7 +11,7 @@
 
 class UR5GUI : public App {
     public:
-        UR5GUI(int width, int height, URSocket* sock):App(width, height), _URSocket(sock), screen_width(width), screen_height(height){
+        UR5GUI(int width, int height, URSocket* sock, RoboDKClient* robo_dk_client):App(width, height), _URSocket(sock), _RoboDKClient(robo_dk_client), screen_width(width), screen_height(height){
             InitPanelSizes();
             InitUpdStruct();
             std::cout << "Initialising GUI\n";
@@ -41,9 +41,32 @@ class UR5GUI : public App {
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
                     _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
-                }
-                
-                
+                }  
+            }
+
+            if (!_RoboDKClient->Connected()) {
+                //std::cout << "waiting for connection..." << std::endl;
+                _RoboDKClient->Connect(robodk_IP, robodk_port); // Accept any incoming connection.
+            }
+            else 
+            {
+                // handle the current connection and update state
+                if(_RoboDKClient->HandleConnection(recv_msg)){
+                    if (strncmp(recv_msg, "READY", 5) == 0){
+                        std::cout << "Ready to update image\n";
+                        bool ret = LoadTextureFromFile("C:/Users/Thor9/Downloads/Test.png", &my_image_texture, &my_image_width, &my_image_height);
+                        IM_ASSERT(ret);
+                        sprintf(send_msg, "capture");
+                        _RoboDKClient->Send(send_msg);
+
+                    } else {
+                        std::cout << "An error occured\n";
+                        std::cout << "Got message: " << recv_msg << ".\n";
+                        std::cout << "Comparison result: " << strcmp(recv_msg, "READY") << "\n"; 
+                    }
+
+                    //_Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
+                }  
             }
 
             // Resize the window to fit the glfw window.
@@ -516,6 +539,11 @@ class UR5GUI : public App {
 
             GLuint my_image_texture = 0;
             URSocket* _URSocket;
+            RoboDKClient* _RoboDKClient;
+
+            const char* robodk_IP = "127.0.0.1";
+            int robodk_port = 50008;
+
             Decoder _Decoder;
 
             //UpdateValues _UpdVals;
@@ -578,9 +606,10 @@ class UR5GUI : public App {
 
 
 int main(int x, char**){
-    URSocket* Sock = new URSocket(50005);
+    URSocket* URSock = new URSocket(50005);
+    RoboDKClient* RoboClient = new RoboDKClient();
 
-    UR5GUI GUI(1280, 720, Sock);
+    UR5GUI GUI(1280, 720, URSock, RoboClient);
     GUI.Run();
 
     return 0;
