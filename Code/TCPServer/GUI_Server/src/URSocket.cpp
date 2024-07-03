@@ -1,6 +1,12 @@
 #include "URSocket.hpp"
 #include <iostream>
 
+#ifdef _WIN32
+    const char REUSABLE = '1';
+#else
+    int REUSABLE = 1;
+#endif
+
 bool set_nonblocking(SOCKET my_socket){
   #ifdef _WIN32
     // set the socket to non-blocking

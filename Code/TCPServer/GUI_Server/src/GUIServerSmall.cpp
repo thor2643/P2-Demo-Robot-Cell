@@ -60,7 +60,7 @@ class UR5GUISmall : public App {
             //makeCamPanel();
             //makeCmdPanel();
             makeDashboardPanel();
-            HelloWorldWindow();
+            //HelloWorldWindow();
 
 
             if (show_test_popup){
@@ -99,6 +99,9 @@ class UR5GUISmall : public App {
         }
 
         void makeCmdPanel() {
+              
+            ImGuiIO& io = ImGui::GetIO();
+            io.WantTextInput = true;
             // Begin Hierachy Panel (Top Right)
             ImGuiChildFlags child_flags = ImGuiChildFlags_Border;
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
@@ -182,10 +185,10 @@ class UR5GUISmall : public App {
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], dash_panel_info[1]), ImGuiCond_Always);
             ImGui::BeginChild("Dashboard", ImVec2(dash_panel_info[2], dash_panel_info[3]), true, window_flags);
             ImGui::Indent((int)(dash_panel_info[2]/2-ImGui::GetFontSize()*2));
-            ImGui::TextUnformatted("Dashboard");
+            //ImGui::TextUnformatted("Dashboard");
 
             // A lot of copy pasting with small modification to create the dashboard panels
-            static int first_row_ypos = 30;
+            static int first_row_ypos = 0;
             static int first_row_height = 75;
             static int second_row_ypos = first_row_ypos + first_row_height;
             static int second_row_height = 75;
@@ -467,7 +470,7 @@ class UR5GUISmall : public App {
         
 
         private:
-            bool show_demo_window = true;
+            bool show_demo_window = false;
             bool show_another_window = false;
             bool show_refill_window = false;
             bool show_test_popup = false;
