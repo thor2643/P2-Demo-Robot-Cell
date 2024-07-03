@@ -17,6 +17,9 @@
   #include <arpa/inet.h>
   #include <netdb.h>  /* Needed for getaddrinfo() and freeaddrinfo() */
   #include <unistd.h> /* Needed for close() */
+  #include <fcntl.h>
+  #include <errno.h>
+  
   typedef int SOCKET;
   #define INVALID_SOCKET -1
   #define SOCKET_ERROR -1
@@ -29,6 +32,8 @@
   int REUSABLE = 1;
 
 #endif
+
+#include <cstring>
 
 class URSocket {
     public:
