@@ -14,7 +14,7 @@ def activate_gripper(name):
             simulation.set_IO(0, 1)
             simulation.set_IO(1, 1)
         
-#Used tp provide the absolute pathe to dispensers
+#Used to provide the absolute pathe to dispensers
 current_directory = os.getcwd()
 
 names_paths = [["TopDispenser", current_directory + '/StepFiles/CoverDispenserAssembled.step'],
@@ -25,7 +25,7 @@ names_paths = [["TopDispenser", current_directory + '/StepFiles/CoverDispenserAs
 simulation = RoboDKProgram.RoboDKProgram(ref_frame_name="Ref Frame")
 
 #Uncomment to load files from pc
-simulation.load_dispensers_from_PC(names_paths)
+#simulation.load_dispensers_from_PC(names_paths)
 
 #Retrieve items in robodk by name
 names = [name_path[0] for name_path in names_paths]
@@ -56,7 +56,7 @@ simulation.set_in_circular_position(names_angles, radius=radius)
 
 #Uncomment to create target points
 #List over joint intervals
-joint_configurations = [[-105, 0], [-105, -45], [80, 150], [-100, -25], [35, 105], [-150, 360]]
+joint_configurations = [[-105, 0], [-105, -45], [80, 150], [-100, -25], [-325, -255], [-150, 360]]
 simulation.create_dispenser_targetpoints(names, joint_configurations)
 
 prog_name = "Main program"
@@ -69,7 +69,7 @@ TCP_assembly_position = [350, 0, 127.155] #127.155 comes is the TCP measured in 
 
 #Offsets relative to TCP of bottom assembly target (found in fusion 360)
 pcb_offset = [0.6, 0, 9.5]              #mm
-fuse_offset = [-32.15, 1.75, -14.7]      #mm
+fuse_offset = [-32.15, 1.75, 12]      #mm
 top_offset = [0, 0, 14.7]               #mm 
 
 approach_z_offset = robomath.transl(0,0,50)
