@@ -21,6 +21,7 @@ bool set_nonblocking(SOCKET my_socket){
     if (fcntl(my_socket, F_SETFL, fcntl(my_socket, F_GETFL) | O_NONBLOCK) == -1) {
       return false;
     }
+    
 
     return true;
   #endif
@@ -66,14 +67,15 @@ int URSocket::SockInit(int port)
         WSADATA wsa_data;
         WSAStartup(MAKEWORD(1,1), &wsa_data);
     #else
-        return 0;
+        //return 0;
     #endif
 
     // Create TCP socket
 	_server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	if (_server_socket == INVALID_SOCKET) {
-        std::cout << "Failed to create Socket\n";
+        int error_code = GetError();
+        std::cout << "Failed to create Socket: " << error_code << "\n";
 		return false;
 	}
 
