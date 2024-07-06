@@ -175,7 +175,9 @@ bool URSocket::AcceptConnection(){
 
 bool URSocket::HandleConnection(char* msg){
     char recv_buf[1024];
+    //std::cout << "Receiving data\n";
     int result = recv(_socket, recv_buf, 1024, 0);
+    //std::cout << "Received data\n";
 
     // Check if anything has been received or if an error has occured
     if (result <= 0) 
@@ -191,7 +193,7 @@ bool URSocket::HandleConnection(char* msg){
             _connected = false;
             return false;
         } else if (result == 0 || error_code == WSAECONNRESET) {
-            std::cout << "Failed to send: socket closed: " << error_code << "\n";
+            std::cout << "Failed to receive: socket closed: " << error_code << "\n";
             SockClose(_socket);
             _connected = false;
             return false;
@@ -213,8 +215,16 @@ bool URSocket::HandleConnection(char* msg){
     } 
 }
 
-void URSocket::Send(char* msg){
-    int result = send(_socket, msg, (int)strlen(msg), 0);
+void URSocket::Send(char* msg, int msg_type){
+    int result;
+    if (msg_type == 1){ //string type
+        result = send(_socket, msg, (int)strlen(msg), 0);
+    } else if (msg_type == 2) { //int type
+        result = send(_socket, msg, sizeof(int), 0);
+    } else {
+        result = send(_socket, msg, (int)strlen(msg), 0);
+    }
+    
 
     if (result <= 0) {
         int err = GetError();

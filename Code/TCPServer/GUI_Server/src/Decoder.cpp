@@ -27,10 +27,13 @@ void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
 
     // The buffer can be passed directly as the ASCII format fromt the UR5
     // mathches the char format of c++ (atleast for the tested platforms).
+    std::cout << "Before parsing\n";
 	if(doc.Parse(recv_buf) != tinyxml2::XML_SUCCESS) {
         std::cout << "Could not parse the received data\n";
+        std::cout << "Received: \n" << recv_buf << "\n";
         return;
     } 
+    std::cout << "After parsing\n";
 
     // Now the different values can extrapolated and put into the upd_vals struct
     // Definition of upd_vals can be found and in Decoder.hpp

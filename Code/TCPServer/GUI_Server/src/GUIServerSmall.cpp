@@ -40,6 +40,7 @@ class UR5GUISmall : public App {
             {
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
+                    std::cout << "Received data\n";
                     _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
                 }  
             }
@@ -138,8 +139,24 @@ class UR5GUISmall : public App {
             
             ImGui::Indent(90);
             if (ImGui::Button("ADD")) {
-                sprintf(send_msg, "5,%s,%s,%s,%s,%s,%s", refill_bot_blue, refill_bot_pink, refill_bot_black, refill_top_blue, refill_top_pink, refill_top_black);
-                _URSocket->Send(send_msg);
+                //sprintf(send_msg, "5,%s,%s,%s,%s,%s,%s", refill_bot_blue, refill_bot_pink, refill_bot_black, refill_top_blue, refill_top_pink, refill_top_black);
+                //_URSocket->Send(send_msg);
+                int id = htonl(5);
+                memcpy(send_msg, &id, sizeof(int));
+                _URSocket->Send(send_msg, 2); //, sizeof(id));
+                /*
+                int fuses_refill_int = atoi(refill_fuses);
+                if (fuses_refill_int != 0){
+                    int id = htonl(6);
+                    fuses_refill_int = htonl(fuses_refill_int);
+                    memcpy(send_msg, &id, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                    memcpy(send_msg, &fuses_refill_int, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                } else {
+                    std::cout << "Could not convert string to int. Please check input\n";
+                }
+                */
             }
             ImGui::EndChild(); // Cover child
 
@@ -154,8 +171,20 @@ class UR5GUISmall : public App {
             ImGui::SameLine();
 
             if (ImGui::Button("ADD##1")) {
-                sprintf(send_msg, "6,%s", refill_fuses);
-                _URSocket->Send(send_msg);
+                int fuses_refill_int = atoi(refill_fuses);
+                if (fuses_refill_int != 0){
+                    int id = htonl(6);
+                    fuses_refill_int = htonl(fuses_refill_int);
+                    memcpy(send_msg, &id, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                    memcpy(send_msg, &fuses_refill_int, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                } else {
+                    std::cout << "Could not convert string to int. Please check input\n";
+                } 
+
+                //sprintf(send_msg, "6,%s", refill_fuses);
+                //_URSocket->Send(send_msg);
             }
 
 
@@ -166,9 +195,20 @@ class UR5GUISmall : public App {
             ImGui::InputText("##PCBs", refill_pcb, 16);
             ImGui::SameLine();
             if (ImGui::Button("ADD##2")) {
-                TestPopupWindow();
-                sprintf(send_msg, "7,%s", refill_pcb);
-                _URSocket->Send(send_msg);
+                int pcb_refill_int = atoi(refill_pcb);
+                if (pcb_refill_int != 0){
+                    int id = htonl(7);
+                    pcb_refill_int = htonl(pcb_refill_int);
+                    memcpy(send_msg, &id, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                    memcpy(send_msg, &pcb_refill_int, sizeof(int));
+                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                } else {
+                    std::cout << "Could not convert string to int. Please check input\n";
+                } 
+                
+                //sprintf(send_msg, "7,%s", refill_pcb);
+                //_URSocket->Send(send_msg);
             }
 
 
@@ -370,30 +410,42 @@ class UR5GUISmall : public App {
             ImGui::SameLine(0, 30);
 
             if (ImGui::Button("Conventional\n    Program", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
-                strcpy(send_msg, "1RUN SIMPLE");
-                _URSocket->Send(send_msg);
+                //strcpy(send_msg, "1RUN SIMPLE");
+                //_URSocket->Send(send_msg);
+                int id = htonl(1);
+                memcpy(send_msg, &id, sizeof(int));
+                _URSocket->Send(send_msg, 2); //, sizeof(id));
             }
 
             ImGui::SameLine(0, 30);
 
             if (ImGui::Button("    Fast\nProgram", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
-                strcpy(send_msg, "3RUN FAST");
-                _URSocket->Send(send_msg);
+                //strcpy(send_msg, "3RUN FAST");
+                //_URSocket->Send(send_msg);
+                int id = htonl(3);
+                memcpy(send_msg, &id, sizeof(int));
+                _URSocket->Send(send_msg, 2); 
             }
 
             ImGui::SameLine(0, 30);
 
             if (ImGui::Button("    Stop\nProgram", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
-                strcpy(send_msg, "2STOP PROGRAM");
-                _URSocket->Send(send_msg);
+                //strcpy(send_msg, "2STOP PROGRAM");
+                //_URSocket->Send(send_msg);
+                int id = htonl(2);
+                memcpy(send_msg, &id, sizeof(int));
+                _URSocket->Send(send_msg, 2); 
             }
 
             ImGui::SameLine(0, 30);
 
             ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(255, 0, 0, 100));
             if (ImGui::Button("EMERGENCY\n      STOP", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
-                strcpy(send_msg, "4STOP");
-                _URSocket->Send(send_msg);
+                //strcpy(send_msg, "4STOP");
+                //_URSocket->Send(send_msg);
+                int id = htonl(4);
+                memcpy(send_msg, &id, sizeof(int));
+                _URSocket->Send(send_msg, 2); 
             }
             ImGui::PopStyleColor();
             ImGui::PopStyleVar();
