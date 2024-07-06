@@ -19,7 +19,7 @@ client_socket.connect(server_address)
 print("connected successfully")
 
 #Script command to send
-script_command = "movej([-1.7456, -1.5051, 2.1969, -1.0906, -4.9803, 3.2557], 1.8, 0.336, 0, 0)" + "\n"
+script_command = "movej([-1.745609, -1.516291, 2.226883, -1.110363, -4.987156, 3.255737],1.8, 0.5,0,0)" + "\n"
 
 client_socket.send(script_command.encode("ascii"))
 

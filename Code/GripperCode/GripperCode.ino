@@ -9,10 +9,10 @@ Servo servoPCB;
  
 bool new_state = false;
 
-int pickupPosTop = 125;    // servo position when picking up object for the top cover
+int pickupPosTop = 122;    // servo position when picking up object for the top cover
 int releasePosTop = 170;   // servo position when releasing object for the top cover
-int pickupPosBot = 100;    // servo position when picking up object for the bottom cover
-int releasePosBot = 130;   // servo position when releasing object for the bottom cover
+int pickupPosBot = 102;    // servo position when picking up object for the bottom cover
+int releasePosBot = 160;   // servo position when releasing object for the bottom cover
 int pickupPosPCB = 133;    // servo position when picking up object for the PCB
 int releasePosPCB = 170;   // servo position when releasing object for the PCB
 
