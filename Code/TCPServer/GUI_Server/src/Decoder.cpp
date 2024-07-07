@@ -75,7 +75,7 @@ void Decoder::decode_upd_msg_str(char* recv_buf, UpdateValuesChars* upd_vals){
 
     // Convert the int representation of state to text representation
     if (strcmp(state, "1") == 0){
-        strcpy(upd_vals->state, "RUNNNING");
+        strcpy(upd_vals->state, "RUNNING");
     } else {
         strcpy(upd_vals->state, "IDLE");
     } 

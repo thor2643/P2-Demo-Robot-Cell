@@ -41,7 +41,6 @@ class UR5GUISmall : public App {
             {
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
-                    std::cout << "Received data\n";
                     _Decoder.decode_upd_msg_str(recv_msg, &_UpdValsChar);
                 }  
             }
@@ -59,51 +58,22 @@ class UR5GUISmall : public App {
                                                 | ImGuiWindowFlags_NoScrollWithMouse);
             
             //Child components are defined in the following functions
-            //makeCamPanel();
-            //makeCmdPanel();
-            makeDashboardPanel();
-            //HelloWorldWindow();
+            MakeMainPanel();
 
-
-            if (show_test_popup){
-                TestPopupWindow();
+            if (show_popup){
+                PopupWindow();
             }
 
             if (show_refill_window){
-                makeCmdPanel();
+                makeRefillWindow();
             }
-                
-                
-
-            // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-            if (show_demo_window){
-                ImGui::ShowDemoWindow(&show_demo_window);
-            }
-                
 
             // End main window
             ImGui::End();
 
         }
 
-        void makeCamPanel() {
-            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
-            ImGui::SetNextWindowPos(ImVec2(cam_panel_info[0], cam_panel_info[1]), ImGuiCond_Always);
-            ImGui::BeginChild("CamFeed", ImVec2(cam_panel_info[2], cam_panel_info[3]), true, window_flags);
-            ImGui::Indent((int)(cam_panel_info[2]/2 - ImGui::GetFontSize() * 9)); // 11 = half the characters in the title
-            ImGui::TextUnformatted("RoboDK Live Simulation");
-            ImGui::Unindent((int)(cam_panel_info[2]/2 - ImGui::GetFontSize() * 9));
-            ImGui::Separator();
-
-            ImGui::Image((void*)(intptr_t)my_image_texture, ImVec2(my_image_width, my_image_height));
-
-            ImGui::EndChild();
-        }
-
-        void makeCmdPanel() {
-              
-            ImGuiIO& io = ImGui::GetIO();
-            io.WantTextInput = true;
+        void makeRefillWindow() {
             // Begin Hierachy Panel (Top Right)
             ImGuiChildFlags child_flags = ImGuiChildFlags_Border;
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
@@ -141,11 +111,16 @@ class UR5GUISmall : public App {
             ImGui::Indent(90);
             if (ImGui::Button("ADD")) {
                 //sprintf(send_msg, "5,%s,%s,%s,%s,%s,%s", refill_bot_blue, refill_bot_pink, refill_bot_black, refill_top_blue, refill_top_pink, refill_top_black);
-                //_URSocket->Send(send_msg);
-                
-                send_cover_refill();
-                
+                //_URSocket->Send(send_msg);  
+                if (send_cover_refill()) {
+                    strcpy(popup_msg, "Refill command sent successfully!");
+                } else {
+                    strcpy(popup_msg, "Refill command could not be sent!\n\n"
+                                        "Please check connection or that inputs are valid integers.");
+                }
+                show_popup = true;   
             }
+
             ImGui::EndChild(); // Cover child
 
             ImGui::SetNextWindowPos(ImVec2(cmd_panel_info[0]+(int)(cmd_panel_info[2]*2/3), cmd_panel_info[1]+50), ImGuiCond_Always);
@@ -164,15 +139,22 @@ class UR5GUISmall : public App {
                     int id = htonl(6);
                     fuses_refill_int = htonl(fuses_refill_int);
                     memcpy(send_msg, &id, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
-                    memcpy(send_msg, &fuses_refill_int, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                    memcpy(send_msg + sizeof(int), &fuses_refill_int, sizeof(int));
+
+                    if (_URSocket->Send(send_msg, 4)){
+                        strcpy(popup_msg, "Refill command sent successfully!");
+                    } else {
+                        strcpy(popup_msg, "Failed to send refill command!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                    }            
                 } else {
                     std::cout << "Could not convert string to int. Please check input\n";
+                    strcpy(popup_msg, "Could not convert string to int!\n\n"
+                                        "Please check that inputs are valid integers.");
                 } 
 
-                //sprintf(send_msg, "6,%s", refill_fuses);
-                //_URSocket->Send(send_msg);
+                show_popup = true;
             }
 
 
@@ -188,15 +170,21 @@ class UR5GUISmall : public App {
                     int id = htonl(7);
                     pcb_refill_int = htonl(pcb_refill_int);
                     memcpy(send_msg, &id, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
-                    memcpy(send_msg, &pcb_refill_int, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
+                    memcpy(send_msg + sizeof(int), &pcb_refill_int, sizeof(int));
+
+                    if (_URSocket->Send(send_msg, 4)){
+                        strcpy(popup_msg, "Refill command sent successfully!");
+                    } else {
+                        strcpy(popup_msg, "Failed to send refill command!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                    } 
                 } else {
                     std::cout << "Could not convert string to int. Please check input\n";
+                    strcpy(popup_msg, "Could not convert string to int!\n\n"
+                                        "Please check connection or that inputs are valid integers.");
                 } 
-                
-                //sprintf(send_msg, "7,%s", refill_pcb);
-                //_URSocket->Send(send_msg);
+                show_popup = true;
             }
 
 
@@ -207,7 +195,7 @@ class UR5GUISmall : public App {
             ImGui::End(); // Interactions child
         }
 
-        void makeDashboardPanel() {
+        void MakeMainPanel() {
             ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
             // TODO: Make header font bigger
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], dash_panel_info[1]), ImGuiCond_Always);
@@ -397,22 +385,31 @@ class UR5GUISmall : public App {
 
             ImGui::SameLine(0, 30);
 
-            if (ImGui::Button("Conventional\n    Program", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
-                //strcpy(send_msg, "1RUN SIMPLE");
-                //_URSocket->Send(send_msg);
-                int id = htonl(1);
-                memcpy(send_msg, &id, sizeof(int));
-                _URSocket->Send(send_msg, 2); //, sizeof(id));
+            if (ImGui::Button("Custom\n  Order", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
+                //int id = htonl(3);
+                //memcpy(send_msg, &id, sizeof(int));
+                //_URSocket->Send(send_msg, 2);
+
+                strcpy(popup_msg, "Not yet implemented...\n"); 
+                show_popup = true;
             }
 
             ImGui::SameLine(0, 30);
 
-            if (ImGui::Button("    Fast\nProgram", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
+            if (ImGui::Button("  Run\nDemo", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
                 //strcpy(send_msg, "3RUN FAST");
                 //_URSocket->Send(send_msg);
-                int id = htonl(3);
+                int id = htonl(1);
                 memcpy(send_msg, &id, sizeof(int));
-                _URSocket->Send(send_msg, 2); 
+
+                if (_URSocket->Send(send_msg, 2)){
+                    strcpy(popup_msg, "Demo program started!");
+                } else {
+                    strcpy(popup_msg, "Failed to send start command!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                }       
+                show_popup = true;
             }
 
             ImGui::SameLine(0, 30);
@@ -422,7 +419,15 @@ class UR5GUISmall : public App {
                 //_URSocket->Send(send_msg);
                 int id = htonl(2);
                 memcpy(send_msg, &id, sizeof(int));
-                _URSocket->Send(send_msg, 2); 
+
+                if (_URSocket->Send(send_msg, 2)){
+                    strcpy(popup_msg, "Program will stop when current process finishes.");
+                } else {
+                    strcpy(popup_msg, "Failed to send stop command!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                }  
+                show_popup = true;
             }
 
             ImGui::SameLine(0, 30);
@@ -433,7 +438,15 @@ class UR5GUISmall : public App {
                 //_URSocket->Send(send_msg);
                 int id = htonl(4);
                 memcpy(send_msg, &id, sizeof(int));
-                _URSocket->Send(send_msg, 2); 
+
+                if (_URSocket->Send(send_msg, 2)){
+                    strcpy(popup_msg, "Emergency stop sent!\n\n Start program on UR robot to reconnect");
+                } else {
+                    strcpy(popup_msg, "Failed to send emergency stop command!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                } 
+                show_popup = true;
             }
             ImGui::PopStyleColor();
             ImGui::PopStyleVar();
@@ -441,35 +454,23 @@ class UR5GUISmall : public App {
             ImGui::EndChild(); // Dashboard child
         }
 
-        // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
-        void HelloWorldWindow()
-        {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
-
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-            ImGui::End();
-        }
-
         // TODO: Send start signal to robot over TCP
-        void TestPopupWindow(){            
-            ImGui::Begin("Program Started", &show_test_popup);
+        void PopupWindow(){          
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+            
+            ImGui::SetNextWindowPos(ImVec2(cmd_panel_info[0]+100, cmd_panel_info[1]), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(250, 200), ImGuiCond_Always);  
+            ImGui::Begin("Program Started", &show_popup, window_flags);
+            
+            ImGui::TextWrapped(popup_msg);
+            ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
 
-            ImGui::TextWrapped(recv_msg);
+            ImGui::Indent(100);
+
+            if (ImGui::Button("OK", ImVec2(ImGui::GetFontSize() * 2, ImGui::GetFontSize() * 2))){
+                show_popup = false;
+            }
+
             ImGui::End();
            
         }
@@ -513,7 +514,8 @@ class UR5GUISmall : public App {
             bool show_demo_window = false;
             bool show_another_window = false;
             bool show_refill_window = false;
-            bool show_test_popup = false;
+            bool show_popup = false;
+
             int my_image_width = 0;
             int my_image_height = 0;
 
@@ -541,8 +543,8 @@ class UR5GUISmall : public App {
             int screen_height;
 
             char recv_msg[1024];
-
             char send_msg[1024];
+            char popup_msg[1024];
 
             //Positioning {x_pos, y_pos, width, height}
             int cam_panel_info[4]; 
@@ -638,7 +640,11 @@ class UR5GUISmall : public App {
                 memcpy(send_msg + 6 * sizeof(int), &refill_bot_black_int, sizeof(int));
                 
                 // Send with msg type 3, which ensures correct size
-                _URSocket->Send(send_msg, 3); //, sizeof(id));
+                if (_URSocket->Send(send_msg, 3)){
+                    return true;
+                } else {
+                    return false;
+                }; 
   
             }
 };

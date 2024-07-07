@@ -217,7 +217,7 @@ bool URSocket::HandleConnection(char* msg){
     } 
 }
 
-void URSocket::Send(char* msg, int msg_type){
+bool URSocket::Send(char* msg, int msg_type){
     int result;
 
     if (msg_type == 1){ //string type
@@ -227,23 +227,27 @@ void URSocket::Send(char* msg, int msg_type){
     } else if (msg_type == 3) { //for sending cover refill
         int size = 7 * sizeof(int);
         result = send(_socket, msg, size, 0);
+    } else if (msg_type == 4) { //for sending fuse and pcb refill
+        int size = 2 * sizeof(int);
+        result = send(_socket, msg, size, 0);
     }
 
     // Clear buffer
-    memset(msg, 0, sizeof(msg));
+    memset(msg, 0, 1024);
     
     if (result <= 0) {
         int err = GetError();
         if (err == WSAEWOULDBLOCK) {
             std::cout << "Failed to send: would block: " << err << "\n";
-            return;
+            return false;
         }
 
         // returning 0 or WSAECONNRESET means closed by host
-        if (result == 0 || err == WSAECONNRESET) {
+        else if (result == 0 || err == WSAECONNRESET) {
             std::cout << "Failed to send: socket closed: " << err << "\n";
             SockClose(_socket);
             _connected = false;
+            return false;
         }
         else
         {
@@ -251,8 +255,10 @@ void URSocket::Send(char* msg, int msg_type){
             std::cout << "Failed to send: send Error: " << err;
             SockClose(_socket);
             _connected = false;
+            return false;
         }
-        return;
+    } else {
+        return true;
     }
 }
 
