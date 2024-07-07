@@ -8,7 +8,7 @@ Decoder::~Decoder(){
 
 }
 
-void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
+void Decoder::decode_upd_msg_xml(char* recv_buf, UpdateValuesChars* upd_vals){
 
     /* Received message will look something like this 
         "<update_msg>"
@@ -65,5 +65,31 @@ void Decoder::decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals){
     strcpy(upd_vals->black_bot_left, black_bot_left->GetText());
     strcpy(upd_vals->fuses_left, fuses_left->GetText());
     strcpy(upd_vals->pcb_left, pcb_left->GetText());
+}
+
+void Decoder::decode_upd_msg_str(char* recv_buf, UpdateValuesChars* upd_vals){
+    // Returns first token 
+    //char str_in[] = {"[1, 1.25, 5, 8, 4, 3, 2]hsdc kalmd 5"};
+    char* new_str = strtok(recv_buf, "]");
+    char* state = strtok(new_str, "[,] ");
+
+    // Convert the int representation of state to text representation
+    if (strcmp(state, "1") == 0){
+        strcpy(upd_vals->state, "RUNNNING");
+    } else {
+        strcpy(upd_vals->state, "IDLE");
+    } 
+
+    // Copy tokenized values into upd_vals struct
+    strcpy(upd_vals->units_produced, strtok(NULL, "[,] "));
+    strcpy(upd_vals->cycle_time, strtok(NULL, "[,] "));
+    strcpy(upd_vals->blue_top_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->pink_top_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->black_top_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->blue_bot_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->pink_bot_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->black_bot_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->fuses_left, strtok(NULL, "[,] "));
+    strcpy(upd_vals->pcb_left, strtok(NULL, "[,] "));
 }
 

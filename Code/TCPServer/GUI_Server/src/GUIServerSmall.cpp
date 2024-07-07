@@ -9,6 +9,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+
 class UR5GUISmall : public App {
     public:
         UR5GUISmall(int width, int height, URSocket* sock):App(width, height), _URSocket(sock), screen_width(width), screen_height(height){
@@ -41,7 +42,7 @@ class UR5GUISmall : public App {
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
                     std::cout << "Received data\n";
-                    _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
+                    _Decoder.decode_upd_msg_str(recv_msg, &_UpdValsChar);
                 }  
             }
 

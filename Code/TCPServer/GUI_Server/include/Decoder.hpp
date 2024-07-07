@@ -28,7 +28,8 @@ class Decoder {
         Decoder();
         ~Decoder();
 
-        void decode_upd_msg(char* recv_buf, UpdateValuesChars* upd_vals);
+        void decode_upd_msg_xml(char* recv_buf, UpdateValuesChars* upd_vals);
+        void decode_upd_msg_str(char* recv_buf, UpdateValuesChars* upd_vals);
 };
 
 #endif
