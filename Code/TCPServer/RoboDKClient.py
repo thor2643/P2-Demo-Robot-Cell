@@ -1,3 +1,11 @@
+"""
+    Program created for the original GUIServer.cpp to show image of RoboDK simulation.
+    Uses RoboDK API to retrieve image from the camera in RoboDK (RoboDK/P2-Cell) and
+    saves it to a file location from which the GUI program can read the image.
+    To avoid simultaneous accessing the image file a socket communication is used to 
+    request the image from this program, which then confirms when the image is ready.
+"""
+
 import socket
 from robodk import robolink
 import time

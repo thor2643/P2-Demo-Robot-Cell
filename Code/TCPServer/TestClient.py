@@ -1,5 +1,5 @@
 """
-A script to quickly test if a TCP server can accept an incoming connection
+    A script to quickly test if a TCP server can accept an incoming connection.
 """
 
 import sys
@@ -18,7 +18,7 @@ client_socket.connect(server_address)
 print("connected successfully")
 
 while True:
-    x = input()
+    x = input("Enter q to quit: ")
     if x == "q":
         break
 
