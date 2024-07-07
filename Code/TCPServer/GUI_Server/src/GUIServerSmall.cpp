@@ -142,22 +142,9 @@ class UR5GUISmall : public App {
             if (ImGui::Button("ADD")) {
                 //sprintf(send_msg, "5,%s,%s,%s,%s,%s,%s", refill_bot_blue, refill_bot_pink, refill_bot_black, refill_top_blue, refill_top_pink, refill_top_black);
                 //_URSocket->Send(send_msg);
-                int id = htonl(5);
-                memcpy(send_msg, &id, sizeof(int));
-                _URSocket->Send(send_msg, 2); //, sizeof(id));
-                /*
-                int fuses_refill_int = atoi(refill_fuses);
-                if (fuses_refill_int != 0){
-                    int id = htonl(6);
-                    fuses_refill_int = htonl(fuses_refill_int);
-                    memcpy(send_msg, &id, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
-                    memcpy(send_msg, &fuses_refill_int, sizeof(int));
-                    _URSocket->Send(send_msg, 2); //, sizeof(id));
-                } else {
-                    std::cout << "Could not convert string to int. Please check input\n";
-                }
-                */
+                
+                send_cover_refill();
+                
             }
             ImGui::EndChild(); // Cover child
 
@@ -594,6 +581,66 @@ class UR5GUISmall : public App {
                 strcpy(_UpdValsChar.cycle_time, "0");
             }
 
+            bool send_cover_refill() {
+                char* end_ptr;
+                int id = htonl(5);
+
+                // Convert input text to ints and make a sanity check 
+                int refill_top_blue_int = (int)strtol(refill_top_blue, &end_ptr, 10);
+                if (end_ptr == refill_top_blue){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_top_blue_int = htonl(refill_top_blue_int);
+
+                int refill_top_pink_int = (int)strtol(refill_top_pink, &end_ptr, 10);
+                if (end_ptr == refill_top_pink){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_top_pink_int = htonl(refill_top_pink_int);
+
+                int refill_top_black_int = (int)strtol(refill_top_black, &end_ptr, 10);
+                if (end_ptr == refill_top_black){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_top_black_int = htonl(refill_top_black_int);
+
+                int refill_bot_blue_int = (int)strtol(refill_bot_blue, &end_ptr, 10);
+                if (end_ptr == refill_bot_blue){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_bot_blue_int = htonl(refill_bot_blue_int);
+
+                int refill_bot_pink_int = (int)strtol(refill_bot_pink, &end_ptr, 10);
+                if (end_ptr == refill_top_blue){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_bot_pink_int = htonl(refill_bot_pink_int);
+
+                int refill_bot_black_int = (int)strtol(refill_bot_black, &end_ptr, 10);
+                if (end_ptr == refill_bot_black){     //if no characters were converted these pointers are equal
+                    printf("ERROR: can't convert string to number\n");
+                    return false;
+                }
+                refill_bot_black_int = htonl(refill_bot_black_int);
+
+                // If conversion were succesfull the ints can be copied into send buffer and sent.
+                memcpy(send_msg, &id, sizeof(int));
+                memcpy(send_msg + sizeof(int), &refill_top_blue_int, sizeof(int));
+                memcpy(send_msg + 2 * sizeof(int), &refill_top_pink_int, sizeof(int));
+                memcpy(send_msg + 3 * sizeof(int), &refill_top_black_int, sizeof(int));
+                memcpy(send_msg + 4 * sizeof(int), &refill_bot_blue_int, sizeof(int));
+                memcpy(send_msg + 5 * sizeof(int), &refill_bot_pink_int, sizeof(int));
+                memcpy(send_msg + 6 * sizeof(int), &refill_bot_black_int, sizeof(int));
+                
+                // Send with msg type 3, which ensures correct size
+                _URSocket->Send(send_msg, 3); //, sizeof(id));
+  
+            }
 };
 
 

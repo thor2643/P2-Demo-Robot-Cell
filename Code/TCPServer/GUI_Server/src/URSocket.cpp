@@ -219,15 +219,19 @@ bool URSocket::HandleConnection(char* msg){
 
 void URSocket::Send(char* msg, int msg_type){
     int result;
+
     if (msg_type == 1){ //string type
         result = send(_socket, msg, (int)strlen(msg), 0);
     } else if (msg_type == 2) { //int type
         result = send(_socket, msg, sizeof(int), 0);
-    } else {
-        result = send(_socket, msg, (int)strlen(msg), 0);
+    } else if (msg_type == 3) { //for sending cover refill
+        int size = 7 * sizeof(int);
+        result = send(_socket, msg, size, 0);
     }
-    
 
+    // Clear buffer
+    memset(msg, 0, sizeof(msg));
+    
     if (result <= 0) {
         int err = GetError();
         if (err == WSAEWOULDBLOCK) {
