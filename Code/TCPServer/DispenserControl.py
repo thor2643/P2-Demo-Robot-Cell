@@ -3,20 +3,11 @@
     the dispenser communication is done through this python script. A local socket connection
     is used to talk with the main GUI program.
 """
-
+import time
 import socket
 import serial
 
-import serial
-
-
-# Set arduino connected port
-serial_port = '/dev/ttyUSB0' #'COM4'
-
-# Open serial port
-ser = serial.Serial(serial_port, 9600)  
-
-# Set address and port
+# Set socket address and port
 host = "localhost"
 port = 50010
 
@@ -25,8 +16,51 @@ server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((host, port))
 server_socket.listen(1)
 
-print(f"Server listening on {host}:{port}")
-
-# Accept connection request from GUI program
 client_socket, addr = server_socket.accept()
 print(f"Connection from {addr}")
+
+#client_socket.send("READY".encode("ascii"))
+
+# Set arduino connected port
+serial_port = 'COM4' #'/dev/ttyUSB0' #'COM4'
+
+# Open serial port
+ser = serial.Serial(serial_port, 9600)  
+#ser.open()
+
+
+while True:
+    # Tell GUI client that it can now receive dispenser commands
+    client_socket.send("READY".encode("ascii"))
+
+    # Wait for commands
+    request = client_socket.recv(1024).decode("ascii")
+
+    if request.isdigit():
+        # Send the motor number to the Arduino
+        ser.write(request.encode())
+    elif request == "STOP":
+        break
+    else:
+        client_socket.send("ERROR".encode("ascii"))
+        print(f"Received non-digit: {request}")
+        continue
+
+    data = ser.readline().decode().strip()
+
+    if data == "FINISHED":
+        print("Component ready!")
+        client_socket.send("FINISHED".encode("ascii"))
+    else:
+        print("Error")
+        client_socket.send("ERROR".encode("ascii"))
+
+    # To avoid congestion wait 200 ms
+    time.sleep(0.2)
+
+    
+
+
+client_socket.close()
+ser.close()
+

@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "URSocket.hpp"
 #include "Decoder.hpp"
+#include <deque>
 
 // This is a special compile scenario, where only a header is given.
 // No cpp file is needed and there the file is also not mentioned in the makefile.
@@ -12,12 +13,15 @@
 
 class UR5GUISmall : public App {
     public:
-        UR5GUISmall(int width, int height, URSocket* sock):App(width, height), _URSocket(sock), screen_width(width), screen_height(height){
+        UR5GUISmall(int width, int height, URSocket* ur_sock, RoboDKClient* disp_sock):App(width, height), _URSocket(ur_sock), _DispenserClient(disp_sock), screen_width(width), screen_height(height){
             InitPanelSizes();
             InitUpdStruct();
             std::cout << "Initialising GUI\n";
             bool ret = LoadTextureFromFile("../P2_Cell_Static.png", &my_image_texture, &my_image_width, &my_image_height);
             IM_ASSERT(ret);
+
+            // Make sure order list is empty
+            order_list.clear();
         }
 
         ~UR5GUISmall() = default;
@@ -45,6 +49,74 @@ class UR5GUISmall : public App {
                 }  
             }
 
+            if (!_DispenserClient->Connected()) {
+                //std::cout << "waiting for connection..." << std::endl;
+                _DispenserClient->Connect(dispenser_IP, dispenser_port); // Accept any incoming connection.
+            }
+            else 
+            {
+                // handle the current connection and update state
+                if(_DispenserClient->HandleConnection(recv_msg)){
+                    if (strncmp(recv_msg, "READY", 5) == 0){
+                        dispenser_ready = true;
+                        std::cout << "Dispenser ready!";
+                        //sprintf(send_msg, "capture");
+                        //_DispenserClient->Send(send_msg);
+
+                    } else if (strncmp(recv_msg, "FINISHED", 8) == 0) {
+                        component_ready = true;
+                    } else {
+                        std::cout << "An error occured\n";
+                        std::cout << "Got message: " << recv_msg << ".\n";
+                        std::cout << "Comparison result: " << strcmp(recv_msg, "READY") << "\n"; 
+                    }
+                }  
+            }
+
+            // Handle dispenser and UR synchronization.
+            if (!order_list.empty()){
+                if(dispenser_ready){
+                    // Send order to dispensers
+                    sprintf(send_msg, "%d", order_list.front());
+                    _DispenserClient->Send(send_msg);
+
+                    // Remove order from list and set dispenser not ready
+                    order_list.pop_front();
+                    dispenser_ready = false;
+                }
+            }   
+
+            if (component_ready && !robot_stopped){
+                int id = htonl(1);
+                memcpy(send_msg, &id, sizeof(int));
+
+                if (_URSocket->Send(send_msg, 2)){
+                    component_ready = false;                        
+                } else {
+                    strcpy(popup_msg, "Failed to reach robot!\n\n"
+                                        "Please check that program runs on UR robot."
+                                        "Otherwise, try to restart UR program");
+                    order_list.empty();
+                    show_popup = true;
+                }    
+
+                //If done update state on UR robot
+                if (order_list.empty()) {
+                    int id = htonl(2);
+                    memcpy(send_msg, &id, sizeof(int));
+
+                    if (_URSocket->Send(send_msg, 2)){
+                        strcpy(popup_msg, "Program will stop when current process finishes.");
+                        // Clear order deque to stop dispensers
+                        robot_stopped = true;
+                    } else {
+                        strcpy(popup_msg, "Failed to send stop command!\n\n"
+                                            "Please check that program runs on UR robot."
+                                            "Otherwise, try to restart UR program");
+                    }  
+                    show_popup = true;
+                }     
+            }           
             
             // Resize the window to fit the glfw window.
             ImGui::SetNextWindowPos(ImGui::GetMainViewport()->Pos);
@@ -399,6 +471,16 @@ class UR5GUISmall : public App {
             if (ImGui::Button("  Run\nDemo", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
                 //strcpy(send_msg, "3RUN FAST");
                 //_URSocket->Send(send_msg);
+                for (int i = 0; i < (int)(sizeof(demo_order)/sizeof(int)); i++){
+                    // Copy demo orders into order list
+                    order_list.push_back(demo_order[i]);
+                }
+
+                robot_stopped = false;
+                strcpy(popup_msg, "Demo program started!");
+                show_popup = true;
+
+                /*
                 int id = htonl(1);
                 memcpy(send_msg, &id, sizeof(int));
 
@@ -409,7 +491,7 @@ class UR5GUISmall : public App {
                                         "Please check that program runs on UR robot."
                                         "Otherwise, try to restart UR program");
                 }       
-                show_popup = true;
+                show_popup = true;*/
             }
 
             ImGui::SameLine(0, 30);
@@ -422,6 +504,9 @@ class UR5GUISmall : public App {
 
                 if (_URSocket->Send(send_msg, 2)){
                     strcpy(popup_msg, "Program will stop when current process finishes.");
+                    // Clear order deque to stop dispensers
+                    order_list.clear();
+                    robot_stopped = true;
                 } else {
                     strcpy(popup_msg, "Failed to send stop command!\n\n"
                                         "Please check that program runs on UR robot."
@@ -440,7 +525,10 @@ class UR5GUISmall : public App {
                 memcpy(send_msg, &id, sizeof(int));
 
                 if (_URSocket->Send(send_msg, 2)){
-                    strcpy(popup_msg, "Emergency stop sent!\n\n Start program on UR robot to reconnect");
+                    strcpy(popup_msg, "Emergency stop sent!\n\n Restart program on UR robot to reconnect");
+                    // Clear order deque to stop dispensers
+                    order_list.clear();
+                    robot_stopped = true;
                 } else {
                     strcpy(popup_msg, "Failed to send emergency stop command!\n\n"
                                         "Please check that program runs on UR robot."
@@ -516,14 +604,21 @@ class UR5GUISmall : public App {
             bool show_refill_window = false;
             bool show_popup = false;
 
+            bool robot_stopped = true;
+            bool dispenser_ready = false;
+            bool component_ready = false;
+            bool any_orders = false;
+
+
             int my_image_width = 0;
             int my_image_height = 0;
 
             GLuint my_image_texture = 0;
             URSocket* _URSocket;
+            RoboDKClient* _DispenserClient;
 
-            const char* robodk_IP = "127.0.0.1";
-            int robodk_port = 50008;
+            const char* dispenser_IP = "127.0.0.1";
+            int dispenser_port = 50010;
 
             Decoder _Decoder;
 
@@ -538,6 +633,11 @@ class UR5GUISmall : public App {
             char refill_top_black[16] = "0";
             char refill_fuses[16] = "0";
             char refill_pcb[16] = "0";
+
+            std::deque<int> order_list;
+            const int demo_order[3] = {31, 23, 32}; // blue/blue, pink/black, black/pink
+            //char next_order[2];
+            
 
             int screen_width;
             int screen_height;
@@ -653,9 +753,9 @@ class UR5GUISmall : public App {
 
 int main(int x, char**){
     URSocket* URSock = new URSocket(50005);
-    //RoboDKClient* RoboClient = new RoboDKClient();
+    RoboDKClient* DispenserClient = new RoboDKClient();
 
-    UR5GUISmall GUI(800, 480, URSock);
+    UR5GUISmall GUI(800, 480, URSock, DispenserClient);
     GUI.Run();
 
     return 0;

@@ -40,7 +40,7 @@ class UR5GUI : public App {
             {
                 // handle the current connection and update state
                 if(_URSocket->HandleConnection(recv_msg)){
-                    _Decoder.decode_upd_msg(recv_msg, &_UpdValsChar);
+                    _Decoder.decode_upd_msg_xml(recv_msg, &_UpdValsChar);
                 }  
             }
 
