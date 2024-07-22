@@ -460,7 +460,7 @@ class UR5GUISmall : public App {
             if (ImGui::Button("    Refill\nDispensers", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
                 show_refill_window = true;
                 //system("lxterminal -e 'bash -c \"wvkbd-mobintl\"' &");
-                system("wvkbd-mobintl > /dev/null 2>&1 &");
+                system("env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY wvkbd-mobintl > /dev/null 2>&1 &"); //echo raspberry | sudo -S -k wvkbd-mobintl");// > /dev/null 2>&1 &");
                 keyboard_open = true;
                 
             }
@@ -489,6 +489,7 @@ class UR5GUISmall : public App {
                 robot_stopped = false;
                 strcpy(popup_msg, "Demo program started!");
                 show_popup = true;
+                sprintf(_UpdValsChar.units_ordered, "%d", atoi(_UpdValsChar.units_ordered)+3);
 
                 /*
                 int id = htonl(1);
