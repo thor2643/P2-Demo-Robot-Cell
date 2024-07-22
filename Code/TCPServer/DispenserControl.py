@@ -13,6 +13,7 @@ port = 50010
 
 # Create socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 server_socket.bind((host, port))
 server_socket.listen(1)
 
@@ -22,7 +23,7 @@ print(f"Connection from {addr}")
 #client_socket.send("READY".encode("ascii"))
 
 # Set arduino connected port
-serial_port = 'COM4' #'/dev/ttyUSB0' #'COM4'
+serial_port = '/dev/ttyUSB0' #'COM4'
 
 # Open serial port
 ser = serial.Serial(serial_port, 9600)  

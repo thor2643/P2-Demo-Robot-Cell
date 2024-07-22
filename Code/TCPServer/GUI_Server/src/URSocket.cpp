@@ -291,7 +291,7 @@ int RoboDKClient::SockInit(){
         WSADATA wsa_data;
         WSAStartup(MAKEWORD(1,1), &wsa_data);
     #else
-        return 0;
+        //return 0;
     #endif
 
     // Create TCP socket
@@ -325,7 +325,7 @@ int RoboDKClient::SockQuit()
     #ifdef _WIN32
         return WSACleanup();
     #else
-        return 0;
+        //return 0;
     #endif
 }
 
