@@ -60,7 +60,8 @@ bool top_done = false;
 bool bot_done = false;
 const int steps_per_revolution = 2048;
 signed int steps_per_dispense = 10 * steps_per_revolution; //10 pr. dispense
-signed int step_speed = 1000;
+signed int step_speed = 1500;
+int step_acc = 500;
 
 
 
@@ -85,8 +86,11 @@ void setup() {
 
     // Set the maximum speed in steps per second:
     for (int i=0; i<3; i++){
-        top_cover_motors[i]->setMaxSpeed(1000);
-        bot_cover_motors[i]->setMaxSpeed(1000);
+        top_cover_motors[i]->setMaxSpeed(step_speed);
+        bot_cover_motors[i]->setMaxSpeed(step_speed);
+
+        top_cover_motors[i]->setAcceleration(step_acc);
+        bot_cover_motors[i]->setAcceleration(step_acc);
 
         pinMode(top_enable_pins[i], OUTPUT);
         pinMode(bot_enable_pins[i], OUTPUT);
@@ -142,15 +146,16 @@ void Stepper_Drive(int top_motor_num, int bot_motor_num){
 
 
         // Firsly the speed is set for both the motors.
-        top_cover_motors[top_idx]->setSpeed(step_speed);
-        bot_cover_motors[bot_idx]->setSpeed(step_speed);
-
-        //Serial.println(top_cover_motors[top_idx]->speed());
-        //Serial.println(bot_cover_motors[bot_idx]->speed());
+        //top_cover_motors[top_idx]->setSpeed(step_speed);
+        //bot_cover_motors[bot_idx]->setSpeed(step_speed);
 
         // Set the current position to 0:
         top_cover_motors[top_idx]->setCurrentPosition(0);
         bot_cover_motors[bot_idx]->setCurrentPosition(0);
+
+        // Firsly the speed is set for both the motors.
+        top_cover_motors[top_idx]->moveTo(steps_per_dispense);
+        bot_cover_motors[bot_idx]->moveTo(steps_per_dispense);
 
         top_done = false;
         bot_done = false;
@@ -161,15 +166,17 @@ void Stepper_Drive(int top_motor_num, int bot_motor_num){
             if (top_cover_motors[top_idx]->currentPosition() == steps_per_dispense){
                 top_done = true;        
             } else {
-                top_cover_motors[top_idx]->setSpeed(step_speed);
-                top_cover_motors[top_idx]->runSpeed();
+                //top_cover_motors[top_idx]->setSpeed(step_speed);
+                //top_cover_motors[top_idx]->runSpeed();
+                top_cover_motors[top_idx]->run();
             }
 
             if (bot_cover_motors[bot_idx]->currentPosition() == steps_per_dispense){
                 bot_done = true;        
             } else {
-                bot_cover_motors[bot_idx]->setSpeed(step_speed);
-                bot_cover_motors[bot_idx]->runSpeed();
+                //bot_cover_motors[bot_idx]->setSpeed(step_speed);
+                //bot_cover_motors[bot_idx]->runSpeed();
+                bot_cover_motors[bot_idx]->run();
             }
 
             if (top_done && bot_done){
@@ -177,7 +184,11 @@ void Stepper_Drive(int top_motor_num, int bot_motor_num){
             }
         }
 
-        delay(500);
+        if (i==0){
+            Serial.println("OUT");
+        }
+
+        delay(100);
     }
 
     // Deactivate respective motors

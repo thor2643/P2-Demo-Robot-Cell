@@ -47,11 +47,22 @@ while True:
         print(f"Received non-digit: {request}")
         continue
 
+    # Wait for components to be pushed out
+    data = ser.readline().decode().strip()
+
+    if data == "OUT":
+        time.sleep(2) #2 sec to slide down
+        print("Component ready!")
+        client_socket.send("FINISHED".encode("ascii"))
+    else:
+        print("Error")
+        client_socket.send("ERROR".encode("ascii"))
+
     data = ser.readline().decode().strip()
 
     if data == "FINISHED":
-        print("Component ready!")
-        client_socket.send("FINISHED".encode("ascii"))
+        print("Dispenser ready!")
+        #client_socket.send("FINISHED".encode("ascii"))
     else:
         print("Error")
         client_socket.send("ERROR".encode("ascii"))
