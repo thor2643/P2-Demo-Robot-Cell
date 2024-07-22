@@ -2,6 +2,7 @@
 #include "URSocket.hpp"
 #include "Decoder.hpp"
 #include <deque>
+#include <stdlib.h>
 
 // This is a special compile scenario, where only a header is given.
 // No cpp file is needed and there the file is also not mentioned in the makefile.
@@ -138,6 +139,11 @@ class UR5GUISmall : public App {
 
             if (show_refill_window){
                 makeRefillWindow();
+            }
+            
+            if (!show_refill_window && keyboard_open){
+                system("pkill wvkbd-mobintl");
+                keyboard_open = false;
             }
 
             // End main window
@@ -453,6 +459,10 @@ class UR5GUISmall : public App {
 
             if (ImGui::Button("    Refill\nDispensers", ImVec2(ImGui::GetFontSize() * 6, ImGui::GetFontSize() * 3))) {
                 show_refill_window = true;
+                //system("lxterminal -e 'bash -c \"wvkbd-mobintl\"' &");
+                system("wvkbd-mobintl > /dev/null 2>&1 &");
+                keyboard_open = true;
+                
             }
 
             ImGui::SameLine(0, 30);
@@ -608,6 +618,7 @@ class UR5GUISmall : public App {
             bool dispenser_ready = false;
             bool component_ready = false;
             bool any_orders = false;
+            bool keyboard_open = false;
 
 
             int my_image_width = 0;
