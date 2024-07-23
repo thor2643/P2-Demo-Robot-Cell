@@ -82,8 +82,8 @@ class UR5GUISmall : public App {
                     _DispenserClient->Send(send_msg);
                     
                     //Update components
-                    bot_cover_num = atoi(reinterpret_cast<const char*>(send_msg));
-                    bot_cover_num = atoi(reinterpret_cast<const char*>(send_msg));
+                    bot_cover_num = atoi(reinterpret_cast<const char*>(send_msg[0]));
+                    top_cover_num = atoi(reinterpret_cast<const char*>(send_msg[1]));
                     //bot_cover_num = atoi((const char*)send_msg[0]);
                     //top_cover_num = atoi((const char*)send_msg[1]);
 
