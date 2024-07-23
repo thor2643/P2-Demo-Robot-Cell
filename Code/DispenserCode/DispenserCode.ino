@@ -60,8 +60,8 @@ bool top_done = false;
 bool bot_done = false;
 const int steps_per_revolution = 2048;
 signed int steps_per_dispense = 10 * steps_per_revolution; //10 pr. dispense
-signed int step_speed = 1500;
-int step_acc = 500;
+signed int step_speed = 1400;
+int step_acc = 300;
 
 
 

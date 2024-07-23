@@ -80,6 +80,14 @@ class UR5GUISmall : public App {
                     // Send order to dispensers
                     sprintf(send_msg, "%d", order_list.front());
                     _DispenserClient->Send(send_msg);
+                    
+                    //Update components
+                    bot_cover_num = atoi(reinterpret_cast<const char*>(send_msg));
+                    bot_cover_num = atoi(reinterpret_cast<const char*>(send_msg));
+                    //bot_cover_num = atoi((const char*)send_msg[0]);
+                    //top_cover_num = atoi((const char*)send_msg[1]);
+
+                    updateCovers(bot_cover_num, top_cover_num);
 
                     // Remove order from list and set dispenser not ready
                     order_list.pop_front();
@@ -330,8 +338,8 @@ class UR5GUISmall : public App {
 
             // Cycle time
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], second_row_ypos), ImGuiCond_Always);
-            ImGui::BeginChild("Cycle time", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
-            ImGui::TextUnformatted("Cycle Time");
+            ImGui::BeginChild("Robot cycle time", ImVec2((int)(dash_panel_info[2]/3), second_row_height), child_flags, window_flags);
+            ImGui::TextUnformatted("Robot Cycle Time");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); 
             ImGui::Indent(90);
@@ -362,6 +370,7 @@ class UR5GUISmall : public App {
 
             ImGui::EndChild();
 
+            /*
             // Bottom covers left
             static float blue_bot_left;
             static float pink_bot_left;
@@ -372,6 +381,9 @@ class UR5GUISmall : public App {
             blue_bot_left = atof(_UpdValsChar.blue_bot_left);
             pink_bot_left = atof(_UpdValsChar.pink_bot_left);
             black_bot_left = atof(_UpdValsChar.black_bot_left);
+            */
+            static float max_bot_covers = 10;
+            static char max_bot_buf[16];
             sprintf(max_bot_buf, "/%d", (int)max_bot_covers);
             
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0], third_row_ypos), ImGuiCond_Always);
@@ -379,17 +391,18 @@ class UR5GUISmall : public App {
             ImGui::TextUnformatted("Bottom Covers Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_bot_left/max_bot_covers), ImVec2(130, 0.f), _UpdValsChar.blue_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_bot_left/max_bot_covers), ImVec2(130, 0.f), blue_bot_left_char);ImGui::SameLine(); ImGui::Text(max_bot_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_bot_left/max_bot_covers), ImVec2(130, 0.f), _UpdValsChar.pink_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_bot_left/max_bot_covers), ImVec2(130, 0.f), pink_bot_left_char);ImGui::SameLine(); ImGui::Text(max_bot_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_bot_left/max_bot_covers), ImVec2(130, 0.f), _UpdValsChar.black_bot_left);ImGui::SameLine(); ImGui::Text(max_bot_buf);
+            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_bot_left/max_bot_covers), ImVec2(130, 0.f), black_bot_left_char);ImGui::SameLine(); ImGui::Text(max_bot_buf);
 
             ImGui::EndChild();
 
             // Top covers left
+            /*
             static float blue_top_left;
             static float pink_top_left;
             static float black_top_left;
@@ -399,6 +412,9 @@ class UR5GUISmall : public App {
             blue_top_left = atof(_UpdValsChar.blue_top_left);
             pink_top_left = atof(_UpdValsChar.pink_top_left);
             black_top_left = atof(_UpdValsChar.black_top_left);
+            */
+            static float max_top_covers = 10;
+            static char max_top_buf[16];
             sprintf(max_top_buf, "/%d", (int)max_top_covers);
 
             ImGui::SetNextWindowPos(ImVec2(dash_panel_info[0]+(int)(dash_panel_info[2]/3),  third_row_ypos), ImGuiCond_Always);
@@ -406,13 +422,13 @@ class UR5GUISmall : public App {
             ImGui::TextUnformatted("Top Covers Left");
             ImGui::Separator();
             ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing(); ImGui::Spacing();
-            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_top_left/max_top_covers), ImVec2(130, 0.f), _UpdValsChar.blue_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Blue: "); ImGui::SameLine(); ImGui::ProgressBar((float)(blue_top_left/max_top_covers), ImVec2(130, 0.f), blue_top_left_char);ImGui::SameLine(); ImGui::Text(max_top_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_top_left/max_top_covers), ImVec2(130, 0.f), _UpdValsChar.pink_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Pink: "); ImGui::SameLine(); ImGui::ProgressBar((float)(pink_top_left/max_top_covers), ImVec2(130, 0.f), pink_top_left_char);ImGui::SameLine(); ImGui::Text(max_top_buf);
             ImGui::Spacing();
             ImGui::Spacing();
-            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_top_left/max_top_covers), ImVec2(130, 0.f), _UpdValsChar.black_top_left);ImGui::SameLine(); ImGui::Text(max_top_buf);
+            ImGui::Text("Black:"); ImGui::SameLine(); ImGui::ProgressBar((float)(black_top_left/max_top_covers), ImVec2(130, 0.f), black_top_left_char);ImGui::SameLine(); ImGui::Text(max_top_buf);
 
             ImGui::EndChild();
 
@@ -625,6 +641,23 @@ class UR5GUISmall : public App {
             int my_image_width = 0;
             int my_image_height = 0;
 
+            int bot_cover_num = 0;
+            int top_cover_num = 0;
+
+            int blue_bot_left = 10;
+            int pink_bot_left = 10;
+            int black_bot_left = 10;
+            int blue_top_left = 10;
+            int pink_top_left = 10;
+            int black_top_left = 10;
+
+            char blue_bot_left_char[16] = "10";
+            char pink_bot_left_char[16] = "10";
+            char black_bot_left_char[16] = "10";
+            char blue_top_left_char[16] = "10";
+            char pink_top_left_char[16] = "10";
+            char black_top_left_char[16] = "10";
+
             GLuint my_image_texture = 0;
             URSocket* _URSocket;
             RoboDKClient* _DispenserClient;
@@ -647,7 +680,7 @@ class UR5GUISmall : public App {
             char refill_pcb[16] = "0";
 
             std::deque<int> order_list;
-            const int demo_order[3] = {31, 23, 32}; // blue/blue, pink/black, black/pink
+            const int demo_order[3] = {31, 23, 32}; // blue/black, pink/blue, blue/pink
             //char next_order[2];
             
 
@@ -705,6 +738,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                blue_top_left += refill_top_blue_int;
+                sprintf(blue_top_left_char, "%d", blue_top_left);
                 refill_top_blue_int = htonl(refill_top_blue_int);
 
                 int refill_top_pink_int = (int)strtol(refill_top_pink, &end_ptr, 10);
@@ -712,6 +747,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                pink_top_left += refill_top_pink_int;
+                sprintf(pink_top_left_char, "%d", pink_top_left);
                 refill_top_pink_int = htonl(refill_top_pink_int);
 
                 int refill_top_black_int = (int)strtol(refill_top_black, &end_ptr, 10);
@@ -719,6 +756,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                black_top_left += refill_top_black_int;
+                sprintf(black_top_left_char, "%d", black_top_left);
                 refill_top_black_int = htonl(refill_top_black_int);
 
                 int refill_bot_blue_int = (int)strtol(refill_bot_blue, &end_ptr, 10);
@@ -726,6 +765,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                blue_bot_left += refill_bot_blue_int;
+                sprintf(blue_bot_left_char, "%d", blue_bot_left);
                 refill_bot_blue_int = htonl(refill_bot_blue_int);
 
                 int refill_bot_pink_int = (int)strtol(refill_bot_pink, &end_ptr, 10);
@@ -733,6 +774,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                pink_bot_left += refill_bot_pink_int;
+                sprintf(pink_bot_left_char, "%d", pink_bot_left);
                 refill_bot_pink_int = htonl(refill_bot_pink_int);
 
                 int refill_bot_black_int = (int)strtol(refill_bot_black, &end_ptr, 10);
@@ -740,6 +783,8 @@ class UR5GUISmall : public App {
                     printf("ERROR: can't convert string to number\n");
                     return false;
                 }
+                black_bot_left += refill_bot_black_int;
+                sprintf(black_bot_left_char, "%d", black_bot_left);
                 refill_bot_black_int = htonl(refill_bot_black_int);
 
                 // If conversion were succesfull the ints can be copied into send buffer and sent.
@@ -758,6 +803,45 @@ class UR5GUISmall : public App {
                     return false;
                 }; 
   
+            }
+
+            void updateCovers(int bot_num, int top_num){
+                switch (bot_num)
+                {
+                case 1:
+                    black_bot_left--;
+                    sprintf(black_bot_left_char, "%d", black_bot_left);
+                    break;
+                case 2:
+                    pink_bot_left--;
+                    sprintf(pink_bot_left_char, "%d", pink_bot_left);
+                    break;
+                case 3:
+                    blue_bot_left--;
+                    sprintf(blue_bot_left_char, "%d", blue_bot_left);
+                    break;
+                default:
+                    break;
+                }
+
+                switch (top_num)
+                {
+                case 1:
+                    black_top_left--;
+                    sprintf(black_top_left_char, "%d", black_top_left);
+                    break;
+                case 2:
+                    pink_top_left--;
+                    sprintf(pink_top_left_char, "%d", pink_top_left);
+                    break;
+                case 3:
+                    blue_top_left--;
+                    sprintf(blue_top_left_char, "%d", blue_top_left);
+                    break;
+                default:
+                    break;
+                }
+
             }
 };
 
