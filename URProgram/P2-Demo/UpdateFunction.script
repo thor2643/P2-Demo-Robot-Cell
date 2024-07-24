@@ -1,0 +1,5 @@
+def update_msg(sock_name):
+  list = [state_int, phone_count, cycle_time, top_blue_left, top_pink_left, top_black_left, bot_blue_left, bot_pink_left, bot_black_left, fuses_left, pcb_left]
+  socket_send_string(list, sock_name)
+
+end

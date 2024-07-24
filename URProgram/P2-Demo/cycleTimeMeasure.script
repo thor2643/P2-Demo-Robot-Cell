@@ -1,0 +1,19 @@
+counter = 0
+ 
+ 
+while run_timer == False:
+  sync() 
+end
+ 
+ 
+while True:
+  sync() 
+  counter = counter-(-1)
+  if stop_timer:
+    break
+  end 
+end
+ 
+ 
+cycle_time = counter*0.008 #sec
+ 
