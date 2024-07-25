@@ -18,8 +18,8 @@ class UR5GUISmall : public App {
             InitPanelSizes();
             InitUpdStruct();
             std::cout << "Initialising GUI\n";
-            bool ret = LoadTextureFromFile("../P2_Cell_Static.png", &my_image_texture, &my_image_width, &my_image_height);
-            IM_ASSERT(ret);
+            //bool ret = LoadTextureFromFile("../P2_Cell_Static.png", &my_image_texture, &my_image_width, &my_image_height);
+            //IM_ASSERT(ret);
 
             // Make sure order list is empty
             order_list.clear();
