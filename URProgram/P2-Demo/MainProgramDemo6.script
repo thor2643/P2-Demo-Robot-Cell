@@ -65,14 +65,14 @@ def Mainprogram():
  
   # Top cover assembly
   movej([-1.174741, -1.728508, 2.378797, -0.650280, -5.127917, 3.141593],accel_radss,speed_rads,0,blend_radius_m)
-  movej([-1.174741, -1.653087, 2.427613, -0.774530, -5.127917, 3.141593],accel_radss,speed_rads,0,0)
+  movej([-1.176394, -1.655904, 2.430074, -0.774172, -5.129558, 3.141593],accel_radss,speed_rads,0,0)
   set_digital_out(9, False)
   sleep(0.2)
   set_digital_out(8, False)
-  movej([-1.174741, -1.619238, 2.444822, -0.825579, -5.127917, 3.141593],accel_radss,speed_rads,0,0)
+  movej([-1.176394, -1.621966, 2.447318, -0.825361, -5.129558, 3.141593],accel_radss,speed_rads,0,0)
   set_digital_out(8, True)
   sleep(0.3)
-  movej([-1.174741, -1.728508, 2.378797, -0.650280, -5.127917, 3.141593],accel_radss,speed_rads,0,blend_radius_m)
+  movej([-1.176394, -1.731482, 2.381118, -0.649639, -5.129558, 3.141593],accel_radss,speed_rads,0,blend_radius_m)
   
   # Phone stacking
   set_digital_out(8, False)
