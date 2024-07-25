@@ -17,7 +17,7 @@ The first step to run the cell is making sure that everything is plugged in. The
 <img src="Media/OpenProgram.jpg" width="250"><img src="Media/LoadInstallation.jpg" width="250"><img src="Media/ChooseInstallation.jpg" width="250"><img src="Media/StartProgram.jpg" width="250">
 
 >[!Note]
->If the robot throws a force limit error the enable button must sometimes be pushed while enabling the robot to free it (can take a few tries). The socket connection to the Pi cannot always be reestablished by simply starting the program again. If this is the case the Raspberry Pi must be rebooted.
+>If the robot throws a force limit error the free move button on the backside must sometimes be pushed while enabling the robot to free it (can take a few tries). The socket connection to the Pi cannot always be reestablished by simply starting the program again. If this is the case the Raspberry Pi must be rebooted.
 >Also please ensure that all grippers are opened before restarting program by going to the IO tab and turning ON/OFF pin 8 and 9 until all are opened.
 
 
