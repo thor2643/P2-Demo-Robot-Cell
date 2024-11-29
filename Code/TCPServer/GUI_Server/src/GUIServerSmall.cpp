@@ -145,6 +145,10 @@ class UR5GUISmall : public App {
                 PopupWindow();
             }
 
+            if (show_order_window){
+                OrderWindow();
+            }
+
             if (show_refill_window){
                 makeRefillWindow();
             }
@@ -488,8 +492,8 @@ class UR5GUISmall : public App {
                 //memcpy(send_msg, &id, sizeof(int));
                 //_URSocket->Send(send_msg, 2);
 
-                strcpy(popup_msg, "Not yet implemented...\n"); 
-                show_popup = true;
+                //strcpy(popup_msg, "Not yet implemented...\n"); 
+                show_order_window = true;
             }
 
             ImGui::SameLine(0, 30);
@@ -589,6 +593,52 @@ class UR5GUISmall : public App {
             ImGui::End();
            
         }
+        
+        // TODO: Send start signal to robot over TCP
+        void OrderWindow(){          
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize;
+
+            ImGui::SetNextWindowPos(ImVec2(cmd_panel_info[0]+100, cmd_panel_info[1]), ImGuiCond_Always);
+            ImGui::SetNextWindowSize(ImVec2(250, 325), ImGuiCond_Always);  
+            ImGui::Begin("Custom Order", &show_order_window, window_flags);
+
+            static int top_color = 0;
+            static int bottom_color = 0;
+            static const char* colors[] = { "Black", "Pink", "Blue" };
+            static const char* images[] = { "../resources/black_black.png", "../resources/black_pink.png", "../resources/black_blue.png", 
+                                            "../resources/pink_black.png", "../resources/pink_pink.png", "../resources/pink_blue.png",
+                                            "../resources/blue_black.png", "../resources/blue_pink.png", "../resources/blue_blue.png" };
+
+            ImGui::Text("Select Bottom Color:");
+            ImGui::Combo("##bottom_color", &bottom_color, colors, IM_ARRAYSIZE(colors));
+
+            ImGui::Text("Select Top Color:");
+            ImGui::Combo("##top_color", &top_color, colors, IM_ARRAYSIZE(colors));
+
+            int image_index = bottom_color * 3 + top_color;
+            GLuint image_texture;
+            int image_width, image_height;
+
+            ImGui::Spacing();
+            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 150) / 2);
+            if (LoadTextureFromFile(images[image_index], &image_texture, &image_width, &image_height)) {
+                ImGui::Image((void*)(intptr_t)image_texture, ImVec2(150, 100));
+            }
+
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - ImGui::CalcTextSize("Send Order").x) / 2 - 5);
+            if (ImGui::Button("Send Order", ImVec2(ImGui::GetFontSize() * 5, ImGui::GetFontSize() * 2))) {
+                int order = (top_color + 1) * 10 + (bottom_color + 1);
+                order_list.push_back(order);
+
+                strcpy(popup_msg, "Order has been sent to robot.");
+                show_popup = true;
+            }
+
+            ImGui::End();
+
+        }
 
         // Simple helper function to load an image into a OpenGL texture with common settings
         bool LoadTextureFromFile(const char* filename, GLuint* out_texture, int* out_width, int* out_height){
@@ -629,6 +679,7 @@ class UR5GUISmall : public App {
             bool show_demo_window = false;
             bool show_another_window = false;
             bool show_refill_window = false;
+            bool show_order_window = false;
             bool show_popup = false;
 
             bool robot_stopped = true;
