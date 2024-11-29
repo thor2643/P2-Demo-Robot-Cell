@@ -25,7 +25,7 @@ names_paths = [["TopDispenser", current_directory + '/StepFiles/CoverDispenserAs
 simulation = RoboDKProgram.RoboDKProgram(ref_frame_name="Ref Frame")
 
 #Uncomment to load files from pc
-#simulation.load_dispensers_from_PC(names_paths)
+simulation.load_dispensers_from_PC(names_paths)
 
 #Retrieve items in robodk by name
 names = [name_path[0] for name_path in names_paths]
@@ -90,7 +90,7 @@ top_assembly_approach = approach_z_offset * top_assembly_pose
 
 assembly_targets = []
 
-"""
+
 assembly_targets.append(simulation.add_target(bottom_assembly_approach, "BottomAssemblyApproach", setAsjoint=False))
 assembly_targets.append(simulation.add_target(bottom_assembly_pose, "BottomAssembly", setAsjoint=False))
 assembly_targets.append(simulation.add_target(bottom_assembly_approach, "BottomAssemblyRetract", setAsjoint=False))
@@ -124,6 +124,6 @@ simulation.add_moveJ(assembly_targets[9])
 simulation.add_moveJ(assembly_targets[10])
 activate_gripper("top")
 simulation.add_moveJ(assembly_targets[11])
-"""
+
 
 

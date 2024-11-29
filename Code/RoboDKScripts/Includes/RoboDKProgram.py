@@ -105,13 +105,20 @@ class RoboDKProgram:
                 count = 0
                 for i in range(6):
                     if configuration[i][0] <= joint[i] <= configuration[i][1] and joint[5] < prev_val:
+                        if count == 5:   
+                            target.setJoints(joint)
+                            prev_val = joint[5]
+                            target_set = True
+
                         count += 1
                         pass
                     else:
+                        target.setJoints(joint)
+                        target_set = True
                         print(count)
                         break
 
-                    if count == 6:   
+                    if count == 5:   
                         target.setJoints(joint)
                         prev_val = joint[5]
                         target_set = True
