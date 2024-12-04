@@ -1,0 +1,9 @@
+ Program
+   Robot Program
+     Script: MainProgramDemo6.script
+     sync()
+   Thread_2
+     Script: cycleTimeMeasur
+   Thread_1
+     Script: UpdateFunction.script
+     Script: TCPscriptTest2.script

@@ -1,0 +1,57 @@
+#Address is found in terminal with "ipconfig"
+address = "169.254.15.108"
+port = 50005
+socket_name = "UR_socket"
+
+ 
+connected = socket_open(address, port, socket_name)
+
+while connected != True:
+  connected = socket_open(address, port, socket_name)
+end
+
+ 
+
+
+
+while True:
+  cmd_id = socket_read_binary_integer(1, socket_name)
+  #popup(cmd_id)
+
+
+  if cmd_id[1] != -1:
+    if cmd_id[1] == 1:
+      run_program = True
+    elif cmd_id[1] == 2:
+      run_program = False
+      state_int = 0
+    elif cmd_id[1] == 3:
+      popup("not yet implemented")
+    elif cmd_id[1] == 4:
+      popup("Emergency Stop")
+      halt
+    elif cmd_id[1] == 5:
+      covers_additions = socket_read_binary_integer(6, socket_name)
+      top_blue_left = top_blue_left + covers_additions[1]
+      top_pink_left = top_pink_left + covers_additions[2]
+      top_black_left = top_black_left + covers_additions[3]
+      bot_blue_left = bot_blue_left + covers_additions[4]
+      bot_pink_left = bot_pink_left + covers_additions[5]
+      bot_black_left = bot_black_left + covers_additions[6]
+      #popup("Cover refill is to be implemented")
+    elif cmd_id[1] == 6:
+      fuses_addition = socket_read_binary_integer(1, socket_name)
+      fuses_left = fuses_left + fuses_addition[1]
+    elif cmd_id[1] == 7:
+      pcb_addition = socket_read_binary_integer(1, socket_name)
+      pcb_left = pcb_left + pcb_addition[1]
+    end
+ 
+  else:
+    #popup("oh nooo")
+  end
+ 
+  update_msg(socket_name)
+  sync()
+end
+ 

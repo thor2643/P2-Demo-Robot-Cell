@@ -1,0 +1,16 @@
+#
+#Wed Sep 04 20:05:43 UTC 2002
+state="IDLE"
+phone_count=25
+run_timer=False
+top_black_left=10
+run_program=False
+bot_pink_left=10
+top_pink_left=10
+stop_timer=True
+bot_black_left=10
+pcb_left=4
+bot_blue_left=10
+top_blue_left=10
+cycle_time=29
+fuses_left=30
